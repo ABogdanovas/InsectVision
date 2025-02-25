@@ -1,0 +1,62 @@
+{
+  "settings": "Nustatymai",
+  "fullLanguage": "Lietuvių",
+  "en": "Anglų",
+  "lt": "Lietuvių",
+  "darkMode": "Tamsus režimas",
+  "lightMode": "Šviesus režimas",
+  "logout": "Atsijungti",
+  "logoutConfirmation": "Ar tikrai norite atsijungti?",
+
+  "home": "Pagrindinis",
+  "assistant": "Asistentas",
+  "meditation": "Meditacija",
+
+  "yourAssistant": "Tavo asistentas",
+
+  "completeTests": "Atlik testus",
+  "testFormDescription": "Testai padės mums duoti tau rekomendacijas ir stebėti tavo psichinę sveikatą",
+  "dailyTest": "Dienos testas",
+  "dailyTestDescription": "Dienos testas padės tau stebėti tavo psichinę sveikatą",
+
+  "selectTest": "Pasirink testą",
+  "new": "Naujas",
+
+  "back": "Atgal",
+  "next": "Kitas",
+  "complete": "Baigti",
+
+  "testResults": "Testo rezultatai",
+  "yourResultIs": "Tavo rezultatas yra",
+  "close": "Uždaryti",
+
+  "stress": "Stresas",
+  "depression": "Depresija",
+  "anxiety": "Nerimas",
+
+  "your": "Jūsų",
+  "depressionLevel": "depresijos lygis",
+  "anxietyLevel": "nerimo lygis",
+  "stressLevel": "streso lygis",
+  "was": "buvo",
+
+  "checkStats": "Patikrink savo statistiką čia",
+  "yourStats": "Jūsų statistika",
+  "low": "žemas",
+  "medium": "vidutinis",
+  "high": "aukštas",
+  "whichIs": "kuris yra",
+  "youreFine": "Remiantis testais, jūsų psichinė sveikata atrodo gera. Nieko nereikia daryti.",
+  "seekAdvice": "Jūsų psichinės sveikatos rodiklis atrodo šiek tiek aukštas. Rekomenduojame medituoti, kad sumažintumėte stresą, depresiją ir nerimą.",
+  "getHelp": "Jūsų psichinės sveikatos rodiklis atrodo labai aukštas. Rekomenduojame apsilankyti pas psichologą.",
+  "Low": "Žem",
+  "High": "Auk",
+
+  "suggestions": "Patarimai",
+  "suggestionsDescription": "Čia galite rasti patarimų, kaip pagerinti savo psichinę sveikatą",
+
+  "breathing": "Kvėpavimas",
+  "inhale": "Įkvėpk",
+  "hold": "Laikyk",
+  "exhale": "Iškvėpk"
+}

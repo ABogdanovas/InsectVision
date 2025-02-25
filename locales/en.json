@@ -1,0 +1,62 @@
+{
+  "settings": "Settings",
+  "fullLanguage": "English",
+  "en": "English",
+  "lt": "Lithuanian",
+  "darkMode": "Dark mode",
+  "lightMode": "Light mode",
+  "logout": "Log out",
+  "logoutConfirmation": "Are you sure you want to log out?",
+
+  "home": "Home",
+  "assistant": "Assistant",
+  "meditation": "Meditation",
+
+  "yourAssistant": "Your assistant",
+
+  "completeTests": "Complete tests",
+  "testFormDescription": "Tests will help us to give you suggestions and track you mental health",
+  "dailyTest": "Daily test",
+  "dailyTestDescription": "Daily test will help you track your mental health",
+
+  "selectTest": "Select test",
+  "new": "New",
+
+  "back": "Back",
+  "next": "Next",
+  "complete": "Complete",
+
+  "testResults": "Test results",
+  "yourResultIs": "Your result is",
+  "close": "Close",
+
+  "stress": "Stress",
+  "depression": "Depression",
+  "anxiety": "Anxiety",
+
+  "your": "Your",
+  "depressionLevel": "depression level",
+  "anxietyLevel": "anxiety level",
+  "stressLevel": "stress level",
+  "was": "was",
+
+  "checkStats": "Check your stats here",
+  "yourStats": "Your statistics",
+  "low": "low",
+  "medium": "medium",
+  "high": "high",
+  "whichIs": "which is",
+  "youreFine": "Your mental health seems to be fine based on tests. You don't need to do anything.",
+  "seekAdvice": "Your mental health stat seems to be a little bit high. We advise you to meditate, to relieve stress, depression and anxiety.",
+  "getHelp": "Your mental health stat seems to be very high. We advise you to visit a psychologist.",
+  "Low": "L",
+  "High": "H",
+
+  "suggestions": "Suggestions",
+  "suggestionsDescription": "Here you can find suggestions to improve your mental health",
+
+  "breathing": "Breathing",
+  "inhale": "Inhale",
+  "hold": "Hold",
+  "exhale": "Exhale"
+}
