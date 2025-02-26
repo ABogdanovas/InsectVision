@@ -19,7 +19,6 @@ i18n.on('languageChanged', lng => {
   AsyncStorage.setItem('language', lng);
 });
 
-// Load saved language
 AsyncStorage.getItem('language').then(savedLanguage => {
   if (savedLanguage) {
     i18n.changeLanguage(savedLanguage);

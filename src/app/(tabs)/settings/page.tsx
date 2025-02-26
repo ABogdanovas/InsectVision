@@ -36,7 +36,7 @@ import {MainContext} from '../../MainContext';
 const availableLanguages = ['en', 'lt'];
 
 export default function SettingsPage() {
-  const {setTheme, theme} = useSafeContext(MainContext);
+  const {setTheme, theme, setLanguage} = useSafeContext(MainContext);
 
   const [bottomSheetIndex, setBottomSheetIndex] = useState<number>(-1);
 
@@ -164,6 +164,7 @@ export default function SettingsPage() {
             <RadioButton.Group
               value={i18n.language}
               onValueChange={value => {
+                setLanguage(value);
                 i18n.changeLanguage(value);
               }}>
               <FlatList
@@ -172,6 +173,7 @@ export default function SettingsPage() {
                 renderItem={({item}) => (
                   <ListItem
                     onPress={() => {
+                      setLanguage(item);
                       i18n.changeLanguage(item);
                       bottomSheetModalRef.current?.dismiss();
                     }}

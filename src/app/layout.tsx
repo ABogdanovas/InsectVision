@@ -6,14 +6,20 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../../i18n';
 import {darkTheme, whiteTheme} from '../components';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
 }
+
+const queryClient = new QueryClient();
 
 export default function RootLayout({children}: PropsWithChildren<{}>) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const [messages, setMessages] = useState<MessageType[]>([]);
+
+  const [language, setLanguage] = useState<string>('en');
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -21,6 +27,7 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
         const storedLanguage = await AsyncStorage.getItem('language');
         if (storedLanguage) {
           i18n.changeLanguage(storedLanguage);
+          setLanguage(storedLanguage);
         } else {
           i18n.changeLanguage('en');
         }
@@ -43,20 +50,24 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
   }, []);
 
   return (
-    <MainContext.Provider
-      value={{
-        theme: theme,
-        setTheme: setTheme,
-        messages: messages,
-        setMessages: setMessages,
-      }}>
-      <PaperProvider
-        theme={theme === 'light' ? whiteTheme : darkTheme}
-        settings={{
-          icon: IconComponent,
+    <QueryClientProvider client={queryClient}>
+      <MainContext.Provider
+        value={{
+          theme: theme,
+          setTheme: setTheme,
+          messages: messages,
+          setMessages: setMessages,
+          language: language,
+          setLanguage: setLanguage,
         }}>
-        <SafeAreaProvider>{children}</SafeAreaProvider>
-      </PaperProvider>
-    </MainContext.Provider>
+        <PaperProvider
+          theme={theme === 'light' ? whiteTheme : darkTheme}
+          settings={{
+            icon: IconComponent,
+          }}>
+          <SafeAreaProvider>{children}</SafeAreaProvider>
+        </PaperProvider>
+      </MainContext.Provider>
+    </QueryClientProvider>
   );
 }

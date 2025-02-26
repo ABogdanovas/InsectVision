@@ -26,12 +26,15 @@ export const StateLayer = ({
     return {opacity: withTiming(pressed ? pressedOpacity : 0)};
   });
 
-  return <Animated.View style={[animatedStyle, styles.container, style]} />;
+  return (
+    <Animated.View
+      style={[animatedStyle, styles.container, {backgroundColor: color}, style]}
+    />
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
     position: 'absolute',
     width: '100%',
     height: '100%',
