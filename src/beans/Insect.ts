@@ -1,6 +1,7 @@
 import {z} from 'zod';
+import {locationSchema} from './Location';
 
-export const InsectSchema = z.object({
+export const insectSchema = z.object({
   id: z.number(),
   category_id: z.number(),
   name: z.string(),
@@ -8,8 +9,8 @@ export const InsectSchema = z.object({
   danger_description: z.string().nullable(),
   description: z.string(),
   photo_url: z.string(),
-  location: z.string(),
+  locations: locationSchema.array().optional(),
   habitat: z.string(),
 });
 
-export type Insect = z.infer<typeof InsectSchema>;
+export type Insect = z.infer<typeof insectSchema>;

@@ -1,10 +1,7 @@
 import {
   Appbar,
-  Button,
   Divider,
   Icon,
-  Modal,
-  Portal,
   RadioButton,
   Text,
   useTheme,
@@ -32,6 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {AnimatedPressable, Stack} from '../../../components';
 import {MainContext} from '../../MainContext';
+import {globalStorage} from '../../../..';
 
 const availableLanguages = ['en', 'lt'];
 
@@ -39,8 +37,6 @@ export default function SettingsPage() {
   const {setTheme, theme, setLanguage} = useSafeContext(MainContext);
 
   const [bottomSheetIndex, setBottomSheetIndex] = useState<number>(-1);
-
-  const [visibleModal, setVisibleModal] = useState(false);
 
   const {colors} = useTheme();
 
@@ -76,6 +72,10 @@ export default function SettingsPage() {
               }}>
               <ListItem
                 onPress={() => {
+                  globalStorage.set(
+                    'theme',
+                    theme === 'dark' ? 'light' : 'dark',
+                  );
                   setTheme(theme === 'dark' ? 'light' : 'dark');
                 }}
                 leftComponent={
@@ -101,45 +101,9 @@ export default function SettingsPage() {
                 }
                 text={t('fullLanguage')}
               />
-              <ListItem
-                onPress={() => {
-                  setVisibleModal(true);
-                }}
-                leftComponent={<Icon size={24} source={'logout'} />}
-                text={t('logout')}
-              />
             </Stack>
           </TouchableWithoutFeedback>
         </View>
-        <Portal>
-          <Modal
-            visible={visibleModal}
-            onDismiss={() => setVisibleModal(false)}
-            contentContainerStyle={{
-              backgroundColor: colors.surface,
-              marginHorizontal: 32,
-              padding: 24,
-              borderRadius: 12,
-            }}>
-            <Text variant="titleLarge">{t('logout')}</Text>
-            <Divider style={{width: '100%', marginVertical: 12}} />
-            <Text>{t('logoutConfirmation')}</Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                paddingTop: 20,
-                alignItems: 'flex-end',
-                justifyContent: 'flex-end',
-              }}>
-              <Button
-                onPress={() => {
-                  setVisibleModal(false);
-                }}>
-                {t('close')}
-              </Button>
-            </View>
-          </Modal>
-        </Portal>
 
         <BottomSheetModal
           $modal
@@ -154,7 +118,11 @@ export default function SettingsPage() {
           }}
           ref={bottomSheetModalRef}
           onChange={handleSheetChanges}>
-          <BottomSheetView style={{minHeight: 128, paddingBottom: 24}}>
+          <BottomSheetView
+            style={{
+              minHeight: 128,
+              paddingBottom: 24,
+            }}>
             <Text
               style={{paddingHorizontal: 12, paddingVertical: 8}}
               variant="titleLarge">

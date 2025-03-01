@@ -1,56 +1,53 @@
-import {PropsWithChildren, useEffect, useState} from 'react';
+import {PropsWithChildren, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {MainContext, MessageType} from './MainContext';
 import {PaperProvider} from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../../i18n';
 import {darkTheme, whiteTheme} from '../components';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
+import {QueryClient} from '@tanstack/react-query';
+import {clientPersister} from '../utils/clientStorage';
+
+import {StatusBar} from 'react-native';
+import {globalStorage} from '../..';
 
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24 * 1,
+      staleTime: 1000 * 60 * 60 * 24 * 1,
+      retry: 2,
+    },
+  },
+});
 
 export default function RootLayout({children}: PropsWithChildren<{}>) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const storedTheme = globalStorage.getString('theme') as
+    | 'light'
+    | 'dark'
+    | undefined;
+
+  if (!storedTheme) {
+    globalStorage.set('theme', 'light');
+  }
+
+  const [theme, setTheme] = useState<'light' | 'dark'>(storedTheme ?? 'light');
 
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   const [language, setLanguage] = useState<string>('en');
 
-  useEffect(() => {
-    const loadLanguage = async () => {
-      try {
-        const storedLanguage = await AsyncStorage.getItem('language');
-        if (storedLanguage) {
-          i18n.changeLanguage(storedLanguage);
-          setLanguage(storedLanguage);
-        } else {
-          i18n.changeLanguage('en');
-        }
-      } catch (error) {
-        console.error('Failed to load language:', error);
-      }
-    };
-    loadLanguage();
-  });
-
-  useEffect(() => {
-    const saveLanguage = async () => {
-      try {
-        await AsyncStorage.setItem('language', i18n.language);
-      } catch (error) {
-        console.error('Failed to save language:', error);
-      }
-    };
-    saveLanguage();
-  }, []);
+  i18n.changeLanguage(globalStorage.getString('language'));
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{persister: clientPersister}}>
       <MainContext.Provider
         value={{
           theme: theme,
@@ -65,9 +62,12 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
           settings={{
             icon: IconComponent,
           }}>
-          <SafeAreaProvider>{children}</SafeAreaProvider>
+          <SafeAreaProvider>
+            <StatusBar translucent />
+            {children}
+          </SafeAreaProvider>
         </PaperProvider>
       </MainContext.Provider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
