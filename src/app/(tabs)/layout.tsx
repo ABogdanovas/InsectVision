@@ -9,15 +9,22 @@ export default function TabsLayout({children}: PropsWithChildren<{}>) {
 
   const currentTab = activeRoute ? activeRoute.split('/') : ['home'];
 
+  console.log('currentTab', currentTab);
+
   return (
     <View style={{height: '100%', width: '100%'}}>
       <View style={{flex: 1}}>
         {children}
         <AssistantFAB
+          isVisible={!currentTab.find(value => value === 'settings')}
           onPress={() => {
             linkTo('/assistant');
           }}
-          style={{position: 'absolute', zIndex: 10, bottom: 16, right: 16}}
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+          }}
         />
       </View>
       <BottomBar>

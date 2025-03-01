@@ -1,6 +1,7 @@
 import {FAB, FABProps} from 'react-native-paper';
 import {AvailableIconNames} from '../Icon';
 import {useEffect, useState} from 'react';
+import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 
 const robotIcons: AvailableIconNames[] = [
   'robot-outline',
@@ -10,8 +11,26 @@ const robotIcons: AvailableIconNames[] = [
   'robot-love-outline',
 ];
 
-export const AssistantFAB = (props: Omit<FABProps, 'label'>) => {
+const AnimatedFAB = Animated.createAnimatedComponent(FAB);
+
+export const AssistantFAB = ({
+  style,
+  isVisible,
+  ...other
+}: Omit<FABProps, 'label'> & {isVisible?: boolean}) => {
   const [iconIndex, setIconIndex] = useState(0);
+
+  const animation = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(isVisible ? 1 : 0),
+      transform: [
+        {
+          scale: withTiming(isVisible ? 1 : 0),
+        },
+      ],
+      zIndex: isVisible ? 10 : -1,
+    };
+  });
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -21,5 +40,12 @@ export const AssistantFAB = (props: Omit<FABProps, 'label'>) => {
     return () => clearInterval(intervalId);
   }, []);
 
-  return <FAB icon={robotIcons[iconIndex]} animated={false} {...props} />;
+  return (
+    <AnimatedFAB
+      style={[animation, style]}
+      icon={robotIcons[iconIndex]}
+      animated={false}
+      {...other}
+    />
+  );
 };

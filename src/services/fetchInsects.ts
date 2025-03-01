@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {supabase} from './supabase';
-import {Insect, InsectSchema} from '../beans/Insect';
+import {Insect, insectSchema} from '../beans/Insect';
+import {globalStorage} from '../..';
 
 export const fetchInsects = async ({
   category_id,
@@ -10,7 +10,7 @@ export const fetchInsects = async ({
   range?: {from: number; to: number};
   language?: 'lt' | 'en';
 }): Promise<Insect[]> => {
-  const storedLanguage = (await AsyncStorage.getItem('language')) ?? 'en';
+  const storedLanguage = globalStorage.getString('language') ?? 'en';
 
   const {error, data} = await supabase
     .rpc('get_insects', {p_language: language ?? storedLanguage})
@@ -18,14 +18,8 @@ export const fetchInsects = async ({
 
   if (error) {
     console.log('error', error);
-    return [];
+    throw error;
   }
 
-  const validatedData = InsectSchema.array().safeParse(data);
-
-  if (validatedData.success) {
-    return validatedData.data;
-  }
-  console.log('error', validatedData.error);
-  return [];
+  return insectSchema.array().parse(data);
 };

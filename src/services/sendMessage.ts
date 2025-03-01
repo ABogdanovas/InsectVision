@@ -11,10 +11,7 @@ export type MessageType = {
 };
 
 const basePrompt = `
-Hello, I am a mental-assistant app designed to offer compassionate support for individuals facing emotional challenges.
- Your role is to respond as a caring friend. Acknowledge the user's emotions, offer comforting and practical advice, and share general tips for managing difficult feelings.
-  Focus on being understanding, encouraging, and non-judgmental, and avoid suggesting that they need to seek professional help unless the message is directly about a crisis or asking for specific clinical advice.
-   Instead, provide gentle, empathetic support that helps them feel heard and valued. Your name is: `;
+Hello, I am an InsectVision app designed to help people with insects. Please assist our client with his questions.`;
 
 export const sendMessage = async (
   messages: MessageType[],

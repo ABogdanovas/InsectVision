@@ -1,25 +1,19 @@
 import {Appbar, Searchbar, Text} from 'react-native-paper';
-import {AnimatedPressable, Stack} from '../../../components';
+import {AnimatedPressable, Loading, Stack} from '../../../components';
 import {t} from 'i18next';
-import {FlatList, View, ViewProps} from 'react-native';
+import {FlatList, View} from 'react-native';
 import {useCategories} from '../../../services/useCategories';
 import {Category} from '../../../beans/Category';
 import {Insect} from '../../../beans/Insect';
 import {useInsects} from '../../../services/useInsects';
 import FastImage from '@d11/react-native-fast-image';
-import Animated, {
-  Easing,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
+import {useLinkTo} from '../../../../charon';
 
 const StickySearchbar = () => {
   return (
     <Searchbar
+      icon="magnify"
       value=""
       placeholder="Search"
       style={{marginTop: 8, marginHorizontal: 16}}
@@ -52,11 +46,17 @@ export default function HomePage() {
 const InsectListItem = (item: Insect) => {
   const [loading, setLoading] = useState(true);
 
+  const linkTo = useLinkTo();
+
   return (
     <View>
       <View
         style={{width: 156, height: 156, borderRadius: 12, overflow: 'hidden'}}>
-        <AnimatedPressable style={{width: 156}}>
+        <AnimatedPressable
+          onPress={() => {
+            linkTo(`/insect/${item.id}`);
+          }}
+          style={{width: 156}}>
           <FastImage
             fallback
             onLoadStart={() => setLoading(true)}
@@ -123,33 +123,6 @@ const InsectsList = (item: Category) => {
       />
     </View>
   );
-};
-
-const Loading = ({style, ...props}: ViewProps) => {
-  const progress = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withRepeat(
-      withTiming(1, {
-        duration: 1500,
-        easing: Easing.inOut(Easing.ease),
-      }),
-      -1,
-      true,
-    );
-  }, [progress]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        ['#C0C0C0', '#C0C0C070'],
-      ),
-    };
-  });
-
-  return <Animated.View style={[animatedStyle, style]} {...props} />;
 };
 
 const LoadingInsectItem = () => {

@@ -12,7 +12,8 @@ export default function AssistantPage() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1}}>
       <Appbar.Header elevated>
-        <Appbar.BackAction
+        <Appbar.Action
+          icon="arrow-left"
           onPress={() => {
             goBack();
           }}

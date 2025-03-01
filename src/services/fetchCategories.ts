@@ -1,28 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {supabase} from './supabase';
 import {Category, categorySchema} from '../beans/Category';
+import {globalStorage} from '../..';
 
 export const fetchCategories = async ({
   language,
 }: {
   language?: 'en' | 'lt';
 }): Promise<Category[]> => {
-  const storedLanguage = (await AsyncStorage.getItem('language')) ?? 'en';
+  const storedLanguage = globalStorage.getString('language') ?? 'en';
 
-  const {error, data} = await supabase
+  const {data} = await supabase
     .rpc('get_categories', {p_language: language ?? storedLanguage})
     .select('*');
 
-  if (error) {
-    console.log('error', error);
-    return [];
-  }
+  const validatedData = categorySchema.array().parse(data);
 
-  const validatedData = categorySchema.array().safeParse(data);
-
-  if (validatedData.success) {
-    return validatedData.data;
-  }
-  console.log('error', validatedData.error);
-  return [];
+  return validatedData;
 };
