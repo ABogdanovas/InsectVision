@@ -2,13 +2,16 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <GoogleMaps/GoogleMaps.h>
+#import "RNCConfig.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 
-  [GMSServices provideAPIKey:@"AIzaSyDcSYc1XN1sZYlCTSNrD-Og5tDi8qL_aCU"];
+  NSString *apiUrl = [RNCConfig envFor:@"GOOGLE_API_KEY"];
+
+  [GMSServices provideAPIKey:apiUrl];
   self.moduleName = @"InsectVision";
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
