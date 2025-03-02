@@ -964,6 +964,10 @@ PODS:
     - React-debug
   - react-native-blob-util (0.21.2):
     - React-Core
+  - react-native-config (1.5.5):
+    - react-native-config/App (= 1.5.5)
+  - react-native-config/App (1.5.5):
+    - React-Core
   - react-native-geolocation (3.4.0):
     - DoubleConversion
     - glog
@@ -1386,6 +1390,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-blob-util (from `../node_modules/react-native-blob-util`)
+  - react-native-config (from `../node_modules/react-native-config`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-maps (from `../node_modules/react-native-maps`)
@@ -1501,6 +1506,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-blob-util:
     :path: "../node_modules/react-native-blob-util"
+  react-native-config:
+    :path: "../node_modules/react-native-config"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-google-maps:
@@ -1613,6 +1620,7 @@ SPEC CHECKSUMS:
   React-logger: 87cddd161bd9784d60fc5528f21c57ca07d2962a
   React-Mapbuffer: b6e208217a18044f0f1a183be8f6756ad67b42d7
   react-native-blob-util: 64a732c0b8bb7f4928905e16ea8dc5cde6fb4832
+  react-native-config: 3367df9c1f25bb96197007ec531c7087ed4554c3
   react-native-geolocation: 67d909c955daedea3f8c30d912f004f806edff64
   react-native-google-maps: 7cc1184afe41fbd15a3dffd53c924819f6587b69
   react-native-maps: ee1e65647460c3d41e778071be5eda10e3da6225
