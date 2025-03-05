@@ -9,20 +9,52 @@ import {useInsects} from '../../../services/useInsects';
 import FastImage from '@d11/react-native-fast-image';
 import {useState} from 'react';
 import {useLinkTo} from '../../../../charon';
+import {FilterModal} from './FilterModal';
+import {FilterCategories} from '../../../beans/FilterCategories';
+import {useDebounce} from 'use-debounce';
 
-const StickySearchbar = () => {
+const StickySearchbar = ({
+  onFilterPress,
+  value,
+  onChangeText,
+}: {
+  onFilterPress: () => void;
+  value: string;
+  onChangeText: (text: string) => void;
+}) => {
   return (
     <Searchbar
       icon="magnify"
-      value=""
+      value={value}
+      onChangeText={onChangeText}
       placeholder="Search"
       style={{marginTop: 8, marginHorizontal: 16}}
+      traileringIcon="filter-variant"
+      onTraileringIconPress={onFilterPress}
+      clearIcon="filter-variant"
+      onClearIconPress={onFilterPress}
     />
   );
 };
 
 export default function HomePage() {
   const {data} = useCategories();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  const [filterCategories, setFilterCategories] = useState<
+    {type: FilterCategories; isSelected: boolean}[]
+  >([
+    {type: FilterCategories.isBiting, isSelected: false},
+    {type: FilterCategories.isDanger, isSelected: false},
+    {type: FilterCategories.isEndangered, isSelected: false},
+    {type: FilterCategories.isFlying, isSelected: false},
+    {type: FilterCategories.isParasite, isSelected: false},
+    {type: FilterCategories.isPoisonous, isSelected: false},
+  ]);
 
   return (
     <Stack style={{flex: 1}}>
@@ -33,10 +65,46 @@ export default function HomePage() {
         contentContainerStyle={{gap: 8}}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
-        ListHeaderComponent={StickySearchbar}
+        ListHeaderComponent={StickySearchbar({
+          onChangeText: setSearchQuery,
+          value: searchQuery,
+          onFilterPress: () => {
+            setIsFilterModalVisible(true);
+          },
+        })}
         data={data}
         renderItem={({item}) => {
-          return <InsectsList {...item} />;
+          return (
+            <InsectsList
+              searchQuery={debouncedSearchQuery[0]}
+              item={item}
+              filterCategories={filterCategories.reduce(
+                (acc, curr) => {
+                  return {
+                    ...acc,
+                    [curr.type]: curr.isSelected,
+                  };
+                },
+                {} as {
+                  isDanger: boolean;
+                  isBiting: boolean;
+                  isEndangered: boolean;
+                  isFlying: boolean;
+                  isParasite: boolean;
+                  isPoisonous: boolean;
+                },
+              )}
+            />
+          );
+        }}
+      />
+
+      <FilterModal
+        items={filterCategories}
+        setItems={setFilterCategories}
+        visible={isFilterModalVisible}
+        onDismiss={() => {
+          setIsFilterModalVisible(false);
         }}
       />
     </Stack>
@@ -62,7 +130,7 @@ const InsectListItem = (item: Insect) => {
             onLoadStart={() => setLoading(true)}
             onLoadEnd={() => setLoading(false)}
             source={{
-              uri: item.photo_url,
+              uri: item.photo_urls[0],
               cache: FastImage.cacheControl.cacheOnly,
             }}
             style={{width: 156, height: 156}}
@@ -83,8 +151,31 @@ const InsectListItem = (item: Insect) => {
   );
 };
 
-const InsectsList = (item: Category) => {
-  const {data, isLoading} = useInsects({category_id: item.id});
+const InsectsList = ({
+  item,
+  filterCategories,
+  searchQuery = '',
+}: {
+  item: Category;
+  searchQuery?: string;
+  filterCategories: {
+    isDanger: boolean;
+    isBiting: boolean;
+    isEndangered: boolean;
+    isFlying: boolean;
+    isParasite: boolean;
+    isPoisonous: boolean;
+  };
+}) => {
+  const {data, isLoading} = useInsects({
+    category_id: item.id,
+    filterCategories: filterCategories,
+    searchQuery: searchQuery,
+  });
+
+  if (!isLoading && data!.length === 0) {
+    return null;
+  }
 
   return (
     <View style={{gap: 4}}>
@@ -109,7 +200,12 @@ const InsectsList = (item: Category) => {
                     is_danger: false,
                     location: '',
                     name: '',
-                    photo_url: '',
+                    photo_urls: [''],
+                    is_biting: false,
+                    is_endangered: false,
+                    is_flying: false,
+                    is_parasite: false,
+                    is_poisonous: false,
                   } as Insect),
               )
             : data

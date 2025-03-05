@@ -30,6 +30,7 @@ import Animated, {
 import {AnimatedPressable, Stack} from '../../../components';
 import {MainContext} from '../../MainContext';
 import {globalStorage} from '../../../..';
+import {DeleteDataModal} from './DeleteDataModal';
 
 const availableLanguages = ['en', 'lt'];
 
@@ -37,6 +38,8 @@ export default function SettingsPage() {
   const {setTheme, theme, setLanguage} = useSafeContext(MainContext);
 
   const [bottomSheetIndex, setBottomSheetIndex] = useState<number>(-1);
+
+  const [deleteDataDialogVisible, setDeleteDataDialogVisible] = useState(false);
 
   const {colors} = useTheme();
 
@@ -101,10 +104,21 @@ export default function SettingsPage() {
                 }
                 text={t('fullLanguage')}
               />
+              <ListItem
+                onPress={() => {
+                  setDeleteDataDialogVisible(true);
+                }}
+                leftComponent={<Icon size={24} source="database" />}
+                text="App data"
+              />
             </Stack>
           </TouchableWithoutFeedback>
         </View>
 
+        <DeleteDataModal
+          visible={deleteDataDialogVisible}
+          setVisible={value => setDeleteDataDialogVisible(value)}
+        />
         <BottomSheetModal
           $modal
           backgroundStyle={{

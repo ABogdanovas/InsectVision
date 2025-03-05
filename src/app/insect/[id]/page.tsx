@@ -134,7 +134,7 @@ export default function InsectPage() {
           onLoadStart={() => setLoading(true)}
           onLoadEnd={() => setLoading(false)}
           source={{
-            uri: data?.photo_url,
+            uri: data?.photo_urls[0],
             cache: FastImage.cacheControl.cacheOnly,
           }}
           style={[
