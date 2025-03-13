@@ -11,7 +11,6 @@ export const useCategories = () => {
     gcTime: 1000 * 60 * 60 * 24 * 14,
     staleTime: 1000 * 60 * 60 * 24 * 14,
     queryFn: async () => {
-      console.log('refetch');
       return fetchCategories({language: undefined});
     },
   });

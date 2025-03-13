@@ -1,18 +1,18 @@
 import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister';
 import {MMKV} from 'react-native-mmkv';
 
-const storage = new MMKV({id: 'queryCache'});
+export const queryCacheStorage = new MMKV({id: 'queryCache'});
 
 const clientStorage = {
   setItem: (key, value) => {
-    storage.set(key, value);
+    queryCacheStorage.set(key, value);
   },
   getItem: key => {
-    const value = storage.getString(key);
+    const value = queryCacheStorage.getString(key);
     return value === undefined ? null : value;
   },
   removeItem: key => {
-    storage.delete(key);
+    queryCacheStorage.delete(key);
   },
 };
 

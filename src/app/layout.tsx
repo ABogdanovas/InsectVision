@@ -8,7 +8,6 @@ import {darkTheme, whiteTheme} from '../components';
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
 import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
-
 import {StatusBar} from 'react-native';
 import {globalStorage} from '../..';
 
@@ -16,7 +15,7 @@ function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
 }
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24 * 1,
@@ -25,6 +24,11 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const INITIAL_CHAT_MESSAGE: MessageType = {
+  type: 'Assistant',
+  message: 'Hello, how can I help you?',
+};
 
 export default function RootLayout({children}: PropsWithChildren<{}>) {
   const storedTheme = globalStorage.getString('theme') as
@@ -38,7 +42,9 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
 
   const [theme, setTheme] = useState<'light' | 'dark'>(storedTheme ?? 'light');
 
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([
+    INITIAL_CHAT_MESSAGE,
+  ]);
 
   const [language, setLanguage] = useState<string>('en');
 

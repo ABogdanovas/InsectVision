@@ -10,18 +10,28 @@ import {AssistantFAB, Loading, Stack} from '../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {useLinkTo, useParams} from '../../../../charon';
 import {useInsect} from '../../../services/useInsect';
-import {PropsWithChildren, useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import FastImage from '@d11/react-native-fast-image';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Linking, Platform, ScrollView, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {PERMISSIONS, request} from 'react-native-permissions';
+import {InsectCard} from './InsectCard';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 
-const HEADER_MAX_HEIGHT = 240;
+const HEADER_OFFSET = 20;
+
+const HEADER_MAX_HEIGHT = 260;
 
 const MIN_LATITUDE_DELTA = 30;
 const MIN_LONGITUDE_DELTA = 30;
+
+const AnimatedImage = Animated.createAnimatedComponent(FastImage);
 
 export default function InsectPage() {
   const {goBack} = useNavigation();
@@ -33,8 +43,6 @@ export default function InsectPage() {
   const [loading, setLoading] = useState(true);
 
   const {top} = useSafeAreaInsets();
-
-  console.log(data?.locations);
 
   const linkTo = useLinkTo();
 
@@ -120,53 +128,113 @@ export default function InsectPage() {
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
+  const offsetY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: e => (offsetY.value = e.contentOffset.y),
+  });
+
+  const animatedImageContainerStyle = useAnimatedStyle(() => {
+    const slowGrowth = (x: number, maxOffset: number): number => {
+      const k = -Math.log(0.3) / (2 * maxOffset);
+      return (maxOffset - 1) * (1 - Math.exp(-k * x));
+    };
+
+    const offset = slowGrowth(Math.abs(offsetY.value), HEADER_OFFSET);
+
+    return {
+      transform: [
+        {
+          translateY:
+            offsetY.value < 0
+              ? offsetY.value - HEADER_OFFSET + offset
+              : -HEADER_OFFSET,
+        },
+      ],
+    };
+  });
+
+  const animatedImageStyle = useAnimatedStyle(() => {
+    const imageScaler = (x: number, alpha: number = 0.1): number => {
+      return 1.1 - 0.1 / Math.pow(1 + x, alpha);
+    };
+
+    const scale = imageScaler(Math.abs(offsetY.value));
+
+    return {
+      transform: [
+        {
+          scaleY: offsetY.value < 0 ? scale : 1,
+        },
+      ],
+    };
+  });
+
   return (
     <Stack style={{height: '100%'}}>
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
         scrollEventThrottle={16}
         style={{flex: 1}}
         contentContainerStyle={{
           gap: 12,
           paddingBottom: bottom + 16 + 48, // To prevent the FAB from overlapping the content
         }}>
-        <FastImage
-          fallback
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
-          source={{
-            uri: data?.photo_url,
-            cache: FastImage.cacheControl.cacheOnly,
-          }}
+        <Animated.View
           style={[
+            animatedImageContainerStyle,
             {
-              height: HEADER_MAX_HEIGHT,
-              width: '100%',
+              overflow: 'hidden',
               borderBottomLeftRadius: 16,
               borderBottomRightRadius: 16,
+              marginBottom: -HEADER_OFFSET,
             },
-          ]}
-        />
-        {loading && (
-          <Loading
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: HEADER_MAX_HEIGHT,
-              borderBottomLeftRadius: 16,
-              borderBottomRightRadius: 16,
+          ]}>
+          <AnimatedImage
+            fallback
+            onLoadStart={() => setLoading(true)}
+            onLoadEnd={() => setLoading(false)}
+            source={{
+              uri: data?.photo_urls[0],
+              cache: FastImage.cacheControl.cacheOnly,
             }}
+            style={[
+              {
+                height: HEADER_MAX_HEIGHT,
+                width: '100%',
+              },
+              animatedImageStyle,
+            ]}
           />
-        )}
+          {loading && (
+            <Loading
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: HEADER_MAX_HEIGHT,
+              }}
+            />
+          )}
+        </Animated.View>
         <Text variant="displaySmall" style={{paddingHorizontal: 16}}>
           {data?.name}
         </Text>
-        <ScrollView horizontal contentContainerStyle={{paddingHorizontal: 16}}>
-          <Chip
-            selectedColor="#fff"
-            style={{backgroundColor: data?.is_danger ? '#ff0e0e' : '#008000'}}
-            pointerEvents="none">
-            {data?.is_danger ? 'Danger' : 'Not danger'}
-          </Chip>
+        <ScrollView
+          horizontal
+          contentContainerStyle={{paddingHorizontal: 16, gap: 4}}>
+          {data?.is_danger && (
+            <Chip
+              selectedColor="#fff"
+              style={{backgroundColor: data?.is_danger && '#f94449'}}
+              pointerEvents="none">
+              Danger
+            </Chip>
+          )}
+          {data?.is_flying && <Chip pointerEvents="none">Flying</Chip>}
+          {data?.is_biting && <Chip pointerEvents="none">Can bite</Chip>}
+          {data?.is_endangered && <Chip pointerEvents="none">Endangered</Chip>}
+          {data?.is_parasite && <Chip pointerEvents="none">Parasite</Chip>}
+          {data?.is_poisonous && <Chip pointerEvents="none">Poisonous</Chip>}
         </ScrollView>
         <View style={{gap: 12, paddingHorizontal: 16}}>
           <InsectCard title="Description">
@@ -222,7 +290,7 @@ export default function InsectPage() {
             Find insect control
           </Button>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
       <IconButton
         onPress={goBack}
         mode="contained"
@@ -260,12 +328,3 @@ export default function InsectPage() {
     </Stack>
   );
 }
-
-const InsectCard = ({children, title}: PropsWithChildren<{title: string}>) => {
-  return (
-    <Card>
-      <Card.Title title={title} />
-      <Card.Content>{children}</Card.Content>
-    </Card>
-  );
-};
