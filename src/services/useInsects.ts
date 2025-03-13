@@ -33,7 +33,6 @@ export const useInsects = ({
     gcTime: searchQuery ? 1000 * 60 : 1000 * 60 * 60 * 24 * 14,
     staleTime: searchQuery ? 1000 * 60 : 1000 * 60 * 60 * 24 * 14,
     queryFn: async () => {
-      console.log('refetch');
       return fetchInsects({
         searchQuery: searchQuery,
         language: undefined,

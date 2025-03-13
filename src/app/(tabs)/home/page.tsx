@@ -12,6 +12,7 @@ import {useLinkTo} from '../../../../charon';
 import {FilterModal} from './FilterModal';
 import {FilterCategories} from '../../../beans/FilterCategories';
 import {useDebounce} from 'use-debounce';
+import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
 
 const StickySearchbar = ({
   onFilterPress,
@@ -31,14 +32,13 @@ const StickySearchbar = ({
       style={{marginTop: 8, marginHorizontal: 16}}
       traileringIcon="filter-variant"
       onTraileringIconPress={onFilterPress}
-      clearIcon="filter-variant"
-      onClearIconPress={onFilterPress}
+      clearIcon="close"
     />
   );
 };
 
 export default function HomePage() {
-  const {data} = useCategories();
+  const {data, isLoading} = useCategories();
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -62,6 +62,9 @@ export default function HomePage() {
         <Appbar.Content title={t('insects')} />
       </Appbar.Header>
       <FlatList
+        keyExtractor={(item, index) =>
+          item.id.toString() + '_' + index.toString()
+        }
         contentContainerStyle={{gap: 8}}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
@@ -72,29 +75,48 @@ export default function HomePage() {
             setIsFilterModalVisible(true);
           },
         })}
-        data={data}
+        data={
+          isLoading
+            ? Array.from({length: 5}).map(
+                () =>
+                  ({
+                    id: 1,
+                    name: '',
+                    photo_urls: [''],
+                    description: '',
+                  } as Category),
+              )
+            : data
+        }
         renderItem={({item}) => {
-          return (
-            <InsectsList
-              searchQuery={debouncedSearchQuery[0]}
-              item={item}
-              filterCategories={filterCategories.reduce(
-                (acc, curr) => {
-                  return {
-                    ...acc,
-                    [curr.type]: curr.isSelected,
-                  };
-                },
-                {} as {
-                  isDanger: boolean;
-                  isBiting: boolean;
-                  isEndangered: boolean;
-                  isFlying: boolean;
-                  isParasite: boolean;
-                  isPoisonous: boolean;
-                },
-              )}
-            />
+          return isLoading ? (
+            <Animated.View exiting={FadeOut}>
+              <LoadingCategoryItem />
+            </Animated.View>
+          ) : (
+            <Animated.View entering={FadeIn}>
+              <InsectsList
+                isLoading={isLoading}
+                searchQuery={debouncedSearchQuery[0]}
+                item={item}
+                filterCategories={filterCategories.reduce(
+                  (acc, curr) => {
+                    return {
+                      ...acc,
+                      [curr.type]: curr.isSelected,
+                    };
+                  },
+                  {} as {
+                    isDanger: boolean;
+                    isBiting: boolean;
+                    isEndangered: boolean;
+                    isFlying: boolean;
+                    isParasite: boolean;
+                    isPoisonous: boolean;
+                  },
+                )}
+              />
+            </Animated.View>
           );
         }}
       />
@@ -156,6 +178,7 @@ const InsectsList = ({
   filterCategories,
   searchQuery = '',
 }: {
+  isLoading?: boolean;
   item: Category;
   searchQuery?: string;
   filterCategories: {
@@ -216,6 +239,24 @@ const InsectsList = ({
         keyExtractor={(_item, index) =>
           _item.id.toString() + '_' + index.toString()
         }
+      />
+    </View>
+  );
+};
+
+const LoadingCategoryItem = () => {
+  return (
+    <View style={{gap: 4}}>
+      <Loading
+        style={{width: 156, height: 24, borderRadius: 10, marginLeft: 16}}
+      />
+      <FlatList
+        showsHorizontalScrollIndicator={false}
+        horizontal
+        contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
+        data={Array.from({length: 5})}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={() => <LoadingInsectItem />}
       />
     </View>
   );

@@ -109,7 +109,7 @@ export default function SettingsPage() {
                   setDeleteDataDialogVisible(true);
                 }}
                 leftComponent={<Icon size={24} source="database" />}
-                text="App data"
+                text="Cache"
               />
             </Stack>
           </TouchableWithoutFeedback>

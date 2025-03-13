@@ -3,7 +3,10 @@ import {Button, Dialog, Portal, Text} from 'react-native-paper';
 import {queryCacheStorage} from '../../../utils/clientStorage';
 import {queryClient} from '../../layout';
 import {globalStorage} from '../../../..';
+import FastImage from '@d11/react-native-fast-image';
+
 import RNRestart from 'react-native-restart';
+
 type DeleteDataModalProps = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -13,11 +16,13 @@ export const DeleteDataModal = ({
   setVisible,
   visible,
 }: DeleteDataModalProps) => {
-  const deleteAllStorage = () => {
+  const deleteAllStorage = async () => {
     queryClient.removeQueries();
     queryCacheStorage.clearAll();
     globalStorage.clearAll();
-    RNRestart.restart();
+    await FastImage.clearDiskCache();
+    await FastImage.clearMemoryCache();
+    await RNRestart.restart();
   };
 
   return (
@@ -27,20 +32,12 @@ export const DeleteDataModal = ({
         onDismiss={() => {
           setVisible(false);
         }}>
-        <Dialog.Title>Delete data</Dialog.Title>
+        <Dialog.Title>Clear cache</Dialog.Title>
         <Dialog.Content>
-          <Text variant="bodyMedium">
-            Please choose one of the options below:
-          </Text>
           <View style={{marginLeft: 4}}>
             <Text variant="bodyMedium">
-              • Delete All App Data: This option will permanently remove all
-              your app data, including settings, history and cache. Use this if
-              you want a complete reset of the app.
-            </Text>
-            <Text variant="bodyMedium">
-              • Delete Only History: This option will clear only your scan
-              history while keeping your settings and other app data intact.
+              This option will permanently remove all your app data, including
+              settings, history and cache.
             </Text>
           </View>
         </Dialog.Content>
@@ -52,19 +49,7 @@ export const DeleteDataModal = ({
             Close
           </Button>
           <View style={{flexDirection: 'row'}}>
-            <Button
-              onPress={() => {
-                deleteAllStorage();
-                setVisible(false);
-              }}>
-              All data
-            </Button>
-            <Button
-              onPress={() => {
-                setVisible(false);
-              }}>
-              History
-            </Button>
+            <Button onPress={deleteAllStorage}>Clear</Button>
           </View>
         </Dialog.Actions>
       </Dialog>

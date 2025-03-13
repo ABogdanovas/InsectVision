@@ -76,7 +76,11 @@ const Chip = ({selected, title, onPress}: ChipProps) => {
             <Icon size={16} name="check" />
           </Animated.View>
         )}
-        <Animated.Text style={animatedTextColor}>{title}</Animated.Text>
+        <Animated.Text
+          layout={SequencedTransition.duration(300)}
+          style={animatedTextColor}>
+          {title}
+        </Animated.Text>
       </Animated.View>
     </AnimatedPressable>
   );
