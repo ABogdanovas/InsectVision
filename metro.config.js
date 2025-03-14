@@ -10,6 +10,9 @@ const config = {
   transformer: {
     unstable_allowRequireContext: true,
   },
+  resolver: {
+    assetExts: ['tflite', 'ttf', 'png'],
+  },
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);

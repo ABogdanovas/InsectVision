@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-fast-tflite/src/TensorflowLite.ts b/node_modules/react-native-fast-tflite/src/TensorflowLite.ts
+index 967f46e..1fc4490 100644
+--- a/node_modules/react-native-fast-tflite/src/TensorflowLite.ts
++++ b/node_modules/react-native-fast-tflite/src/TensorflowLite.ts
+@@ -38,7 +38,7 @@ export type TensorflowModelDelegate =
+   | 'metal'
+   | 'core-ml'
+   | 'nnapi'
+-  | 'android-gpu'
++  | 'android-gpudaw'
+ 
+ export interface Tensor {
+   /**

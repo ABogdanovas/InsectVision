@@ -35,7 +35,7 @@ export default function TabsLayout({children}: PropsWithChildren<{}>) {
         <Tab
           isFocused={Boolean(currentTab.find(value => value === 'scanner'))}
           icon="camera"
-          onPress={() => linkTo('/scanner')}
+          onPress={() => linkTo('/insectCamera')}
           label={'scanner'}
         />
         <Tab
