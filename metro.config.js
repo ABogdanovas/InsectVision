@@ -11,7 +11,7 @@ const config = {
     unstable_allowRequireContext: true,
   },
   resolver: {
-    assetExts: ['tflite'],
+    assetExts: ['tflite', 'ttf', 'png'],
   },
 };
 

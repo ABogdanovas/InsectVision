@@ -50,6 +50,8 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
 
   i18n.changeLanguage(globalStorage.getString('language'));
 
+  console.log('dawd');
+
   return (
     <PersistQueryClientProvider
       client={queryClient}
