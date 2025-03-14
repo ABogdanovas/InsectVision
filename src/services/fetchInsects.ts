@@ -7,6 +7,7 @@ export const fetchInsects = async ({
   category_id,
   language,
   searchQuery,
+  range,
 }: {
   searchQuery: string;
   filterCategories: {
@@ -18,7 +19,7 @@ export const fetchInsects = async ({
     isPoisonous: boolean;
   };
   category_id: number;
-  range?: {from: number; to: number};
+  range: {from: number; to: number};
   language?: 'lt' | 'en';
 }): Promise<Insect[]> => {
   const storedLanguage = globalStorage.getString('language') ?? 'en';
@@ -58,7 +59,8 @@ export const fetchInsects = async ({
       filterCategories.isPoisonous ? 'eq' : 'not.is',
       filterCategories.isPoisonous ? true : null,
     )
-    .filter('name', 'ilike', `%${searchQuery}%`);
+    .filter('name', 'ilike', `%${searchQuery}%`)
+    .range(range.from, range.to);
 
   if (error) {
     console.log('error', error);

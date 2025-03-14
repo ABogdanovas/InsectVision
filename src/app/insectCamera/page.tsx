@@ -49,12 +49,12 @@ export default function CameraPage() {
           continue;
         }
 
-        const minX = Number(detection_boxes[i]) * height;
+        const minX = Number(detection_boxes[i]) * width;
 
-        const maxX = Number(detection_boxes[i + 2]) * height;
+        const maxX = Number(detection_boxes[i + 2]) * width;
 
-        const minY = Number(detection_boxes[i + 1]) * width;
-        const maxY = Number(detection_boxes[i + 3]) * width;
+        const minY = Number(detection_boxes[i + 1]) * height;
+        const maxY = Number(detection_boxes[i + 3]) * height;
 
         const w = maxX - minX;
         const h = maxY - minY;

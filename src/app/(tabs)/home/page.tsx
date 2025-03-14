@@ -190,15 +190,17 @@ const InsectsList = ({
     isPoisonous: boolean;
   };
 }) => {
-  const {data, isLoading} = useInsects({
+  const {data, isLoading, fetchNextPage} = useInsects({
     category_id: item.id,
     filterCategories: filterCategories,
     searchQuery: searchQuery,
   });
 
-  if (!isLoading && data!.length === 0) {
+  if (!isLoading && data === undefined) {
     return null;
   }
+
+  const insects = data ? data.pages.flatMap(page => page) : [];
 
   return (
     <View style={{gap: 4}}>
@@ -207,6 +209,9 @@ const InsectsList = ({
       </Text>
 
       <FlatList
+        onEndReached={() => {
+          fetchNextPage();
+        }}
         contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -231,7 +236,7 @@ const InsectsList = ({
                     is_poisonous: false,
                   } as Insect),
               )
-            : data
+            : insects
         }
         renderItem={({item: _item}) =>
           isLoading ? <LoadingInsectItem /> : <InsectListItem {..._item} />
