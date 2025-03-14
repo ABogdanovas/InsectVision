@@ -9,9 +9,10 @@ import {
 import {AnimatedPressable, Icon, Stack} from '../../../components';
 import {Dispatch, SetStateAction, useEffect} from 'react';
 import Animated, {
-  FadeIn,
   interpolateColor,
-  SequencedTransition,
+  LinearTransition,
+  StretchInX,
+  StretchOutX,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -24,6 +25,8 @@ type ChipProps = {
   onPress?: () => void;
   title: string;
 };
+
+const layoutAnimation = LinearTransition.springify().damping(80).stiffness(200);
 
 const Chip = ({selected, title, onPress}: ChipProps) => {
   const isSelected = useSharedValue(selected ? 1 : 0);
@@ -55,34 +58,37 @@ const Chip = ({selected, title, onPress}: ChipProps) => {
   });
 
   return (
-    <AnimatedPressable
-      onPress={() => {
-        onPress?.();
-      }}
-      style={{borderRadius: 8, overflow: 'hidden'}}>
-      <Animated.View
-        layout={SequencedTransition.duration(300)}
-        style={[
-          animatedStyle,
-          {
-            flexDirection: 'row',
-            gap: 8,
-            padding: 8,
-            borderRadius: 8,
-          },
-        ]}>
-        {selected && (
-          <Animated.View entering={FadeIn}>
-            <Icon size={16} name="check" />
-          </Animated.View>
-        )}
-        <Animated.Text
-          layout={SequencedTransition.duration(300)}
-          style={animatedTextColor}>
-          {title}
-        </Animated.Text>
-      </Animated.View>
-    </AnimatedPressable>
+    <Animated.View layout={layoutAnimation}>
+      <AnimatedPressable
+        onPress={() => {
+          onPress?.();
+        }}
+        stateLayerProps={{layout: layoutAnimation}}
+        style={{borderRadius: 8, overflow: 'hidden'}}>
+        <Animated.View
+          layout={layoutAnimation}
+          style={[
+            animatedStyle,
+            {
+              flexDirection: 'row',
+              gap: 8,
+              padding: 8,
+              borderRadius: 8,
+            },
+          ]}>
+          {selected && (
+            <Animated.View
+              entering={StretchInX}
+              exiting={StretchOutX.duration(200)}>
+              <Icon size={16} name="check" />
+            </Animated.View>
+          )}
+          <Animated.Text layout={layoutAnimation} style={animatedTextColor}>
+            {title}
+          </Animated.Text>
+        </Animated.View>
+      </AnimatedPressable>
+    </Animated.View>
   );
 };
 

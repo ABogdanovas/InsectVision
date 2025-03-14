@@ -20,6 +20,7 @@
     "@react-navigation/devtools": "^6.0.27",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "@shopify/flash-list": "^1.7.1",
     "@shopify/react-native-skia": "^1.11.18",
     "@sirse-dev/safe-context": "^0.3.0",
     "@supabase/supabase-js": "^2.49.1",

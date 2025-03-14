@@ -1,6 +1,11 @@
 import {useSafeContext} from '@sirse-dev/safe-context';
 import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
-import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import Animated, {
+  BaseAnimationBuilder,
+  LayoutAnimationFunction,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 import {MainContext} from '../../app/MainContext';
 
 export type StateLayerProps = {
@@ -8,6 +13,11 @@ export type StateLayerProps = {
   pressedOpacity?: number;
   pressed?: boolean;
   style?: StyleProp<ViewStyle>;
+  layout?:
+    | BaseAnimationBuilder
+    | LayoutAnimationFunction
+    | typeof BaseAnimationBuilder
+    | undefined;
 };
 
 export const StateLayer = ({
@@ -15,6 +25,7 @@ export const StateLayer = ({
   pressed = false,
   pressedOpacity = 0.1,
   style,
+  layout,
 }: StateLayerProps) => {
   const {theme} = useSafeContext(MainContext);
 
@@ -29,6 +40,7 @@ export const StateLayer = ({
   return (
     <Animated.View
       style={[animatedStyle, styles.container, {backgroundColor: color}, style]}
+      layout={layout}
     />
   );
 };

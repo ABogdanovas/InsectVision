@@ -42,6 +42,7 @@ export const AssistantFAB = ({
 
   return (
     <AnimatedFAB
+      sharedTransitionTag="assistantFAB"
       style={[animation, style]}
       icon={robotIcons[iconIndex]}
       animated={false}

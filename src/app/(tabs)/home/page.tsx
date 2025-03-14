@@ -1,7 +1,7 @@
 import {Appbar, Searchbar, Text} from 'react-native-paper';
 import {AnimatedPressable, Loading, Stack} from '../../../components';
 import {t} from 'i18next';
-import {FlatList, View} from 'react-native';
+import {FlatList, Platform, View} from 'react-native';
 import {useCategories} from '../../../services/useCategories';
 import {Category} from '../../../beans/Category';
 import {Insect} from '../../../beans/Insect';
@@ -12,7 +12,12 @@ import {useLinkTo} from '../../../../charon';
 import {FilterModal} from './FilterModal';
 import {FilterCategories} from '../../../beans/FilterCategories';
 import {useDebounce} from 'use-debounce';
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+} from 'react-native-reanimated';
+import {FlashList} from '@shopify/flash-list';
 
 const StickySearchbar = ({
   onFilterPress,
@@ -37,6 +42,8 @@ const StickySearchbar = ({
   );
 };
 
+const layoutAnimation = LinearTransition.springify().damping(80).stiffness(200);
+
 export default function HomePage() {
   const {data, isLoading} = useCategories();
 
@@ -56,12 +63,32 @@ export default function HomePage() {
     {type: FilterCategories.isPoisonous, isSelected: false},
   ]);
 
+  const structuredFilterCategories = filterCategories.reduce(
+    (acc, curr) => {
+      return {
+        ...acc,
+        [curr.type]: curr.isSelected,
+      };
+    },
+    {} as {
+      isDanger: boolean;
+      isBiting: boolean;
+      isEndangered: boolean;
+      isFlying: boolean;
+      isParasite: boolean;
+      isPoisonous: boolean;
+    },
+  );
+
   return (
     <Stack style={{flex: 1}}>
       <Appbar.Header elevated>
         <Appbar.Content title={t('insects')} />
       </Appbar.Header>
-      <FlatList
+      <Animated.FlatList
+        itemLayoutAnimation={
+          Platform.OS === 'ios' ? layoutAnimation : undefined
+        }
         keyExtractor={(item, index) =>
           item.id.toString() + '_' + index.toString()
         }
@@ -77,7 +104,7 @@ export default function HomePage() {
         })}
         data={
           isLoading
-            ? Array.from({length: 5}).map(
+            ? Array.from({length: 6}).map(
                 () =>
                   ({
                     id: 1,
@@ -99,22 +126,7 @@ export default function HomePage() {
                 isLoading={isLoading}
                 searchQuery={debouncedSearchQuery[0]}
                 item={item}
-                filterCategories={filterCategories.reduce(
-                  (acc, curr) => {
-                    return {
-                      ...acc,
-                      [curr.type]: curr.isSelected,
-                    };
-                  },
-                  {} as {
-                    isDanger: boolean;
-                    isBiting: boolean;
-                    isEndangered: boolean;
-                    isFlying: boolean;
-                    isParasite: boolean;
-                    isPoisonous: boolean;
-                  },
-                )}
+                filterCategories={structuredFilterCategories}
               />
             </Animated.View>
           );
@@ -139,7 +151,7 @@ const InsectListItem = (item: Insect) => {
   const linkTo = useLinkTo();
 
   return (
-    <View>
+    <Animated.View entering={FadeIn} exiting={FadeOut}>
       <View
         style={{width: 156, height: 156, borderRadius: 12, overflow: 'hidden'}}>
         <AnimatedPressable
@@ -169,8 +181,12 @@ const InsectListItem = (item: Insect) => {
         </AnimatedPressable>
       </View>
       <Text variant="bodyMedium">{item.name}</Text>
-    </View>
+    </Animated.View>
   );
+};
+
+const FlashListSeparator = () => {
+  return <View style={{width: 16}} />;
 };
 
 const InsectsList = ({
@@ -202,19 +218,25 @@ const InsectsList = ({
 
   const insects = data ? data.pages.flatMap(page => page) : [];
 
+  if (insects.length === 0) {
+    return null;
+  }
+
   return (
     <View style={{gap: 4}}>
       <Text variant="titleLarge" style={{paddingHorizontal: 16}}>
         {item.name}
       </Text>
 
-      <FlatList
+      <FlashList
         onEndReached={() => {
           fetchNextPage();
         }}
-        contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
+        estimatedItemSize={156 + 16}
+        contentContainerStyle={{paddingHorizontal: 16}}
         showsHorizontalScrollIndicator={false}
         horizontal
+        ItemSeparatorComponent={FlashListSeparator}
         data={
           isLoading
             ? Array.from({length: 5}).map(

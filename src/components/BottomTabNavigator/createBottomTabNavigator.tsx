@@ -19,12 +19,7 @@ import {
   useNavigationBuilder,
 } from '@react-navigation/native';
 import {useTheme} from 'react-native-paper';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 
 export const ScreenWrapper = ({style, ...props}: ViewProps) => {
   return <View style={[{flex: 1}, style]} {...props} />;

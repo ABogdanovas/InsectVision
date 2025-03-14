@@ -127,7 +127,6 @@ export default function CameraPage() {
     <Stack style={{flex: 1}}>
       <Camera
         pixelFormat="rgb"
-        fps={10}
         device={device}
         frameProcessor={frameProcessor}
         isActive
