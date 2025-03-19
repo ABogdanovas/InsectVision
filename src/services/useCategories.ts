@@ -1,10 +1,9 @@
 import {useQuery} from '@tanstack/react-query';
 import {fetchCategories} from './fetchCategories';
-import {useSafeContext} from '@sirse-dev/safe-context';
-import {MainContext} from '../app/MainContext';
+import {globalStorage} from '../..';
 
 export const useCategories = () => {
-  const {language} = useSafeContext(MainContext);
+  const language = globalStorage.getString('language');
 
   return useQuery({
     queryKey: ['categories', language],

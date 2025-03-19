@@ -12,7 +12,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import {useSafeContext} from '@sirse-dev/safe-context';
 import {useTranslation} from 'react-i18next';
 import CountryFlag from 'react-native-country-flag';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -28,14 +27,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {AnimatedPressable, Stack} from '../../../components';
-import {MainContext} from '../../MainContext';
 import {globalStorage} from '../../../..';
 import {DeleteDataModal} from './DeleteDataModal';
+import {useSafeContext} from '@sirse-dev/safe-context';
+import {MainContext} from '../../MainContext';
 
 const availableLanguages = ['en', 'lt'];
 
 export default function SettingsPage() {
-  const {setTheme, theme, setLanguage} = useSafeContext(MainContext);
+  const {theme, setTheme} = useSafeContext(MainContext);
 
   const [bottomSheetIndex, setBottomSheetIndex] = useState<number>(-1);
 
@@ -146,7 +146,7 @@ export default function SettingsPage() {
             <RadioButton.Group
               value={i18n.language}
               onValueChange={value => {
-                setLanguage(value);
+                globalStorage.set('language', value);
                 i18n.changeLanguage(value);
               }}>
               <FlatList
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                 renderItem={({item}) => (
                   <ListItem
                     onPress={() => {
-                      setLanguage(item);
+                      globalStorage.set('language', item);
                       i18n.changeLanguage(item);
                       bottomSheetModalRef.current?.dismiss();
                     }}

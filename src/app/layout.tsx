@@ -10,6 +10,7 @@ import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
 import {StatusBar} from 'react-native';
 import {globalStorage} from '../..';
+import {t} from 'i18next';
 
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
@@ -25,11 +26,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-const INITIAL_CHAT_MESSAGE: MessageType = {
-  type: 'Assistant',
-  message: 'Hello, how can I help you?',
-};
-
 export default function RootLayout({children}: PropsWithChildren<{}>) {
   const storedTheme = globalStorage.getString('theme') as
     | 'light'
@@ -40,17 +36,13 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
     globalStorage.set('theme', 'light');
   }
 
-  const [theme, setTheme] = useState<'light' | 'dark'>(storedTheme ?? 'light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    globalStorage.getString('theme') as 'light' | 'dark',
+  );
 
-  const [messages, setMessages] = useState<MessageType[]>([
-    INITIAL_CHAT_MESSAGE,
-  ]);
-
-  const [language, setLanguage] = useState<string>('en');
+  const [messages, setMessages] = useState<MessageType[]>([]);
 
   i18n.changeLanguage(globalStorage.getString('language'));
-
-  console.log('dawd');
 
   return (
     <PersistQueryClientProvider
@@ -62,11 +54,9 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
           setTheme: setTheme,
           messages: messages,
           setMessages: setMessages,
-          language: language,
-          setLanguage: setLanguage,
         }}>
         <PaperProvider
-          theme={theme === 'light' ? whiteTheme : darkTheme}
+          theme={theme === 'dark' ? darkTheme : whiteTheme}
           settings={{
             icon: IconComponent,
           }}>

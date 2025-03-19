@@ -17,7 +17,6 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
-import {FlashList} from '@shopify/flash-list';
 
 const StickySearchbar = ({
   onFilterPress,
@@ -33,7 +32,7 @@ const StickySearchbar = ({
       icon="magnify"
       value={value}
       onChangeText={onChangeText}
-      placeholder="Search"
+      placeholder={t('search')}
       style={{marginTop: 8, marginHorizontal: 16}}
       traileringIcon="filter-variant"
       onTraileringIconPress={onFilterPress}
@@ -185,9 +184,9 @@ const InsectListItem = (item: Insect) => {
   );
 };
 
-const FlashListSeparator = () => {
-  return <View style={{width: 16}} />;
-};
+// const FlashListSeparator = () => {
+//   return <View style={{width: 16}} />;
+// };
 
 const InsectsList = ({
   item,
@@ -228,15 +227,15 @@ const InsectsList = ({
         {item.name}
       </Text>
 
-      <FlashList
+      <FlatList
         onEndReached={() => {
           fetchNextPage();
         }}
-        estimatedItemSize={156 + 16}
-        contentContainerStyle={{paddingHorizontal: 16}}
+        // estimatedItemSize={156 + 16}
+        contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
         showsHorizontalScrollIndicator={false}
         horizontal
-        ItemSeparatorComponent={FlashListSeparator}
+        // ItemSeparatorComponent={FlashListSeparator}
         data={
           isLoading
             ? Array.from({length: 5}).map(

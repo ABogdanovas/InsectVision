@@ -23,6 +23,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
+import {t} from 'i18next';
 
 const HEADER_OFFSET = 20;
 
@@ -92,9 +93,9 @@ export default function InsectPage() {
         default: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
       }),
       {
-        title: 'Location permission needed',
-        message: 'We need your location to find the nearest insect control',
-        buttonPositive: 'OK',
+        title: t('locationPermissionTitle'),
+        message: t('locationPermissionDescription'),
+        buttonPositive: 'Ok',
       },
     );
 
@@ -227,24 +228,30 @@ export default function InsectPage() {
               selectedColor="#fff"
               style={{backgroundColor: data?.is_danger && '#f94449'}}
               pointerEvents="none">
-              Danger
+              {t('isDanger')}
             </Chip>
           )}
-          {data?.is_flying && <Chip pointerEvents="none">Flying</Chip>}
-          {data?.is_biting && <Chip pointerEvents="none">Can bite</Chip>}
-          {data?.is_endangered && <Chip pointerEvents="none">Endangered</Chip>}
-          {data?.is_parasite && <Chip pointerEvents="none">Parasite</Chip>}
-          {data?.is_poisonous && <Chip pointerEvents="none">Poisonous</Chip>}
+          {data?.is_flying && <Chip pointerEvents="none">{t('isFlying')}</Chip>}
+          {data?.is_biting && <Chip pointerEvents="none">{t('isBiting')}</Chip>}
+          {data?.is_endangered && (
+            <Chip pointerEvents="none">{t('isEndangered')}</Chip>
+          )}
+          {data?.is_parasite && (
+            <Chip pointerEvents="none">{t('isParasite')}</Chip>
+          )}
+          {data?.is_poisonous && (
+            <Chip pointerEvents="none">{t('isPoisonous')}</Chip>
+          )}
         </ScrollView>
         <View style={{gap: 12, paddingHorizontal: 16}}>
-          <InsectCard title="Description">
+          <InsectCard title={t('description')}>
             <Text>{data?.description}</Text>
           </InsectCard>
-          <InsectCard title="Danger">
+          <InsectCard title={t('dangerDescription')}>
             <Text>{data?.danger_description}</Text>
           </InsectCard>
           <Card>
-            <Card.Title title="Locations" />
+            <Card.Title title={t('location')} />
             <Card.Content style={{marginBottom: 8}}>
               <Text>
                 {data?.locations &&
@@ -263,13 +270,7 @@ export default function InsectPage() {
               <MapView
                 ref={mapRef}
                 provider="google"
-                style={{width: '100%', height: 400}}
-                initialRegion={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}>
+                style={{width: '100%', height: 400}}>
                 {data?.locations &&
                   data.locations.map(location => (
                     <Marker
@@ -283,11 +284,11 @@ export default function InsectPage() {
               </MapView>
             </View>
           </Card>
-          <InsectCard title="Habitat">
+          <InsectCard title={t('habitat')}>
             <Text>{data?.habitat}</Text>
           </InsectCard>
           <Button onPress={findPestsControl} mode="contained">
-            Find insect control
+            {t('findControl')}
           </Button>
         </View>
       </Animated.ScrollView>
@@ -311,8 +312,7 @@ export default function InsectPage() {
         }}
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}>
-        We need your location to find the nearest insect control, please enable
-        location permissions in the settings
+        {t('locationPermissionError')}
       </Snackbar>
       <AssistantFAB
         isVisible={!snackbarVisible}

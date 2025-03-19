@@ -11,8 +11,6 @@ type MainContextType = {
   setTheme: Dispatch<SetStateAction<'light' | 'dark'>>;
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
-  language: string;
-  setLanguage: Dispatch<SetStateAction<string>>;
 };
 
 export const MainContext = createSafeContext<MainContextType>();

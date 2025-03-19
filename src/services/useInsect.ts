@@ -1,10 +1,9 @@
 import {useSuspenseQuery} from '@tanstack/react-query';
-import {useSafeContext} from '@sirse-dev/safe-context';
-import {MainContext} from '../app/MainContext';
 import {fetchInsect} from './fetchInsect';
+import {globalStorage} from '../..';
 
 export const useInsect = ({id}: {id: number}) => {
-  const {language} = useSafeContext(MainContext);
+  const language = globalStorage.getString('language');
 
   return useSuspenseQuery({
     queryKey: ['insect', id, language],

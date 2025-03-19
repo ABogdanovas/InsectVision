@@ -4,14 +4,12 @@ import {OPENAI_KEY} from '@env';
 
 import {MainContext} from '../app/MainContext';
 import {useSafeContext} from '@sirse-dev/safe-context';
+import {globalStorage} from '../..';
 
 export type MessageType = {
   message: string;
   type: 'Assistant' | 'User';
 };
-
-const basePrompt = `
-Hello, I am an InsectVision app designed to help people with insects. Please assist our client with his questions.`;
 
 export const sendMessage = async (
   messages: MessageType[],
@@ -19,6 +17,11 @@ export const sendMessage = async (
   name: string,
 ) => {
   try {
+    const basePrompt = `
+    Hello, I am an InsectVision app designed to help people with insects. Please assist our client with his questions. Answer the following language in ${
+      globalStorage.getString('language') || 'en'
+    }.`;
+
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
