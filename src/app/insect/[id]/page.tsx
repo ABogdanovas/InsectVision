@@ -6,14 +6,21 @@ import {
   Snackbar,
   Text,
 } from 'react-native-paper';
-import {AssistantFAB, Loading, Stack} from '../../../components';
+import {AssistantFAB, Stack} from '../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {useLinkTo, useParams} from '../../../../charon';
 import {useInsect} from '../../../services/useInsect';
 import {useEffect, useRef, useState} from 'react';
 import FastImage from '@d11/react-native-fast-image';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Linking, Platform, ScrollView, View} from 'react-native';
+import {
+  Dimensions,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  View,
+} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {PERMISSIONS, request} from 'react-native-permissions';
@@ -25,14 +32,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import {t} from 'i18next';
 
+import ImageModal from 'react-native-image-modal';
+
 const HEADER_OFFSET = 20;
 
-const HEADER_MAX_HEIGHT = 260;
+const HEADER_MAX_HEIGHT = 300;
 
 const MIN_LATITUDE_DELTA = 30;
 const MIN_LONGITUDE_DELTA = 30;
-
-const AnimatedImage = Animated.createAnimatedComponent(FastImage);
 
 export default function InsectPage() {
   const {goBack} = useNavigation();
@@ -40,8 +47,6 @@ export default function InsectPage() {
   const {id} = useParams();
 
   const {data} = useInsect({id: Number(id)});
-
-  const [loading, setLoading] = useState(true);
 
   const {top} = useSafeAreaInsets();
 
@@ -85,6 +90,8 @@ export default function InsectPage() {
     }
   }, [data]);
 
+  const [findingPestsControl, setFindingPestsControl] = useState(false);
+
   const findPestsControl = async () => {
     const res = await request(
       Platform.select({
@@ -105,25 +112,29 @@ export default function InsectPage() {
     }
 
     if (res === 'granted') {
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          const url = `https://www.google.com/maps/search/insect+control/@${latitude},${longitude},14z`;
-          Linking.canOpenURL(url)
-            .then(supported => {
-              if (supported) {
-                Linking.openURL(url);
-              } else {
-                console.error('Cannot open link', url);
-              }
-            })
-            .catch(err => console.error('Failed to open link', err));
-        },
-        error => {
-          console.error('Cannot set location', error);
-        },
-        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-      );
+      await new Promise(resolve => {
+        Geolocation.getCurrentPosition(
+          position => {
+            const {latitude, longitude} = position.coords;
+            const url = `https://www.google.com/maps/search/insect+control/@${latitude},${longitude},14z`;
+            Linking.canOpenURL(url)
+              .then(supported => {
+                if (supported) {
+                  Linking.openURL(url);
+                } else {
+                  console.error('Cannot open link', url);
+                }
+              })
+              .catch(err => console.error('Failed to open link', err))
+              .finally(() => resolve(null));
+          },
+          error => {
+            console.error('Cannot set location', error);
+            resolve(null);
+          },
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        );
+      });
     }
   };
 
@@ -155,22 +166,6 @@ export default function InsectPage() {
     };
   });
 
-  const animatedImageStyle = useAnimatedStyle(() => {
-    const imageScaler = (x: number, alpha: number = 0.1): number => {
-      return 1.1 - 0.1 / Math.pow(1 + x, alpha);
-    };
-
-    const scale = imageScaler(Math.abs(offsetY.value));
-
-    return {
-      transform: [
-        {
-          scaleY: offsetY.value < 0 ? scale : 1,
-        },
-      ],
-    };
-  });
-
   return (
     <Stack style={{height: '100%'}}>
       <Animated.ScrollView
@@ -191,31 +186,18 @@ export default function InsectPage() {
               marginBottom: -HEADER_OFFSET,
             },
           ]}>
-          <AnimatedImage
-            fallback
-            onLoadStart={() => setLoading(true)}
-            onLoadEnd={() => setLoading(false)}
+          <ImageModal
+            isTranslucent
+            style={{
+              width: Dimensions.get('window').width,
+              height: HEADER_MAX_HEIGHT,
+            }}
+            resizeMode="cover"
+            modalImageResizeMode="contain"
             source={{
               uri: data?.photo_urls[0],
-              cache: FastImage.cacheControl.cacheOnly,
             }}
-            style={[
-              {
-                height: HEADER_MAX_HEIGHT,
-                width: '100%',
-              },
-              animatedImageStyle,
-            ]}
           />
-          {loading && (
-            <Loading
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: HEADER_MAX_HEIGHT,
-              }}
-            />
-          )}
         </Animated.View>
         <Text variant="displaySmall" style={{paddingHorizontal: 16}}>
           {data?.name}
@@ -287,7 +269,13 @@ export default function InsectPage() {
           <InsectCard title={t('habitat')}>
             <Text>{data?.habitat}</Text>
           </InsectCard>
-          <Button onPress={findPestsControl} mode="contained">
+          <Button
+            loading={findingPestsControl}
+            onPress={async () => {
+              setFindingPestsControl(true);
+              findPestsControl().finally(() => setFindingPestsControl(false));
+            }}
+            mode="contained">
             {t('findControl')}
           </Button>
         </View>

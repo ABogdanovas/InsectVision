@@ -8,9 +8,7 @@ import {darkTheme, whiteTheme} from '../components';
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
 import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
-import {StatusBar} from 'react-native';
 import {globalStorage} from '../..';
-import {t} from 'i18next';
 
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
@@ -60,10 +58,7 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
           settings={{
             icon: IconComponent,
           }}>
-          <SafeAreaProvider>
-            <StatusBar translucent />
-            {children}
-          </SafeAreaProvider>
+          <SafeAreaProvider>{children}</SafeAreaProvider>
         </PaperProvider>
       </MainContext.Provider>
     </PersistQueryClientProvider>

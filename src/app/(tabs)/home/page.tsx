@@ -145,12 +145,12 @@ export default function HomePage() {
 }
 
 const InsectListItem = (item: Insect) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const linkTo = useLinkTo();
 
   return (
-    <Animated.View entering={FadeIn} exiting={FadeOut}>
+    <View>
       <View
         style={{width: 156, height: 156, borderRadius: 12, overflow: 'hidden'}}>
         <AnimatedPressable
@@ -180,13 +180,9 @@ const InsectListItem = (item: Insect) => {
         </AnimatedPressable>
       </View>
       <Text variant="bodyMedium">{item.name}</Text>
-    </Animated.View>
+    </View>
   );
 };
-
-// const FlashListSeparator = () => {
-//   return <View style={{width: 16}} />;
-// };
 
 const InsectsList = ({
   item,
@@ -231,11 +227,10 @@ const InsectsList = ({
         onEndReached={() => {
           fetchNextPage();
         }}
-        // estimatedItemSize={156 + 16}
         contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
         showsHorizontalScrollIndicator={false}
         horizontal
-        // ItemSeparatorComponent={FlashListSeparator}
+        maxToRenderPerBatch={10}
         data={
           isLoading
             ? Array.from({length: 5}).map(
