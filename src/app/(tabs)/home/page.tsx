@@ -1,7 +1,7 @@
 import {Appbar, Searchbar, Text} from 'react-native-paper';
 import {AnimatedPressable, Loading, Stack} from '../../../components';
 import {t} from 'i18next';
-import {FlatList, Platform, View} from 'react-native';
+import {FlatList, View} from 'react-native';
 import {useCategories} from '../../../services/useCategories';
 import {Category} from '../../../beans/Category';
 import {Insect} from '../../../beans/Insect';
@@ -85,13 +85,11 @@ export default function HomePage() {
         <Appbar.Content title={t('insects')} />
       </Appbar.Header>
       <Animated.FlatList
-        itemLayoutAnimation={
-          Platform.OS === 'ios' ? layoutAnimation : undefined
-        }
+        itemLayoutAnimation={layoutAnimation}
         keyExtractor={(item, index) =>
           item.id.toString() + '_' + index.toString()
         }
-        contentContainerStyle={{gap: 8}}
+        contentContainerStyle={{gap: 8, paddingBottom: 16}}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
         ListHeaderComponent={StickySearchbar({

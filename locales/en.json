@@ -47,5 +47,11 @@
   "locationPermissionDescription": "We need your location to find the nearest insect control.",
   "locationPermissionError": "We need your location to find the nearest insect control, please enable location permissions in the settings.",
   "initialChatMessage": "Hello! How can I help you?",
-  "chatPlaceholder": "Type a message..."
+  "chatPlaceholder": "Type a message...",
+
+  "appData": "App data",
+  "clearCache": "Clear cache",
+  "clearCacheConfirmation": "Are you sure you want to clear the cache? This will remove all data and reset the app to its initial state.",
+  "clear": "Clear",
+  "selectLanguage": "Select language"
 }

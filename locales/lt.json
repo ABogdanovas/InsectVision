@@ -46,5 +46,11 @@
   "locationPermissionError": "Mums reikia jūsų lokacijos, kad rastume artimiausią vabzdžių kontrolę, prašome įjungti lokacijos leidimus nustatymuose.",
 
   "initialChatMessage": "Sveiki! Kaip galiu jums padėti?",
-  "chatPlaceholder": "Parašykite žinutę..."
+  "chatPlaceholder": "Parašykite žinutę...",
+
+  "appData": "Programos duomenys",
+  "clearCache": "Atlaisvinti atmintį",
+  "clearCacheConfirmation": "Ar tikrai norite išvalyti atmintį? Tai pašalins visus duomenis ir atstatys programą į pradinę būseną.",
+  "clear": "Išvalyti",
+  "selectLanguage": "Pasirinkite kalbą"
 }

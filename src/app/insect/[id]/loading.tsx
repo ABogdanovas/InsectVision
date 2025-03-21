@@ -5,7 +5,7 @@ import {InsectCard} from './InsectCard';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const HEADER_MAX_HEIGHT = 240;
+const HEADER_MAX_HEIGHT = 300;
 
 export default function InsectLoadingPage() {
   const {goBack} = useNavigation();

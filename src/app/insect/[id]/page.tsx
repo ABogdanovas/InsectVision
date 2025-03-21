@@ -29,7 +29,7 @@ import {Insect} from '../../../beans/Insect';
 
 const HEADER_OFFSET = 20;
 
-const HEADER_MAX_HEIGHT = 240;
+const HEADER_MAX_HEIGHT = 300;
 
 const initialLocation = (locations: Insect['locations']) => {
   if (locations) {
@@ -188,11 +188,11 @@ export default function InsectPage() {
             },
           ]}>
           <ImageModal
-            isTranslucent
             style={{
               width: Dimensions.get('window').width,
               height: HEADER_MAX_HEIGHT,
             }}
+            imageBackgroundColor="#C0C0C0"
             resizeMode="cover"
             modalImageResizeMode="contain"
             source={{

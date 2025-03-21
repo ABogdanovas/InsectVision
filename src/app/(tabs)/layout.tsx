@@ -52,13 +52,13 @@ export default function TabsLayout({children}: PropsWithChildren<{}>) {
         />
         <Tab
           isFocused={Boolean(currentTab.find(value => value === 'history'))}
-          icon="meditation"
+          icon="history"
           onPress={() => linkTo('/history')}
           label={t('history')}
         />
         <Tab
           isFocused={Boolean(currentTab.find(value => value === 'settings'))}
-          icon="hammer-wrench"
+          icon="cog"
           onPress={() => linkTo('/settings')}
           label={t('settings')}
         />

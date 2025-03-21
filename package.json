@@ -53,6 +53,7 @@
     "react-native-restart": "^0.0.27",
     "react-native-safe-area-context": "^4.14.1",
     "react-native-screens": "^3.35.0",
+    "react-native-theme-switch-animation": "^0.8.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-vision-camera": "^4.6.4",
     "react-native-worklets-core": "^1.5.0",

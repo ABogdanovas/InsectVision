@@ -7,9 +7,12 @@ import {
   useTheme,
 } from 'react-native-paper';
 import {
+  Dimensions,
   FlatList,
+  GestureResponderEvent,
+  Pressable,
+  ScrollView,
   StyleSheet,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
@@ -22,17 +25,28 @@ import {
 } from '@gorhom/bottom-sheet';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import Animated, {
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import {AnimatedPressable, Stack} from '../../../components';
+import {AnimatedPressable} from '../../../components';
 import {globalStorage} from '../../../..';
 import {DeleteDataModal} from './DeleteDataModal';
 import {useSafeContext} from '@sirse-dev/safe-context';
 import {MainContext} from '../../MainContext';
 
+import switchTheme from 'react-native-theme-switch-animation';
+import {StateLayerProps} from '../../../components/StateLayer/StateLayer';
+
 const availableLanguages = ['en', 'lt'];
+
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
+
+const LAYOUT_ANIMATION = LinearTransition.springify()
+  .damping(80)
+  .stiffness(200);
 
 export default function SettingsPage() {
   const {theme, setTheme} = useSafeContext(MainContext);
@@ -62,24 +76,41 @@ export default function SettingsPage() {
           <Appbar.Header elevated>
             <Appbar.Content title={t('settings')} />
           </Appbar.Header>
-          <TouchableWithoutFeedback
+          <Pressable
+            pointerEvents={bottomSheetIndex === 0 ? 'box-only' : 'auto'}
+            style={{flex: 1}}
             onPress={() => {
               if (bottomSheetIndex === 0) {
                 bottomSheetModalRef.current?.dismiss();
               }
             }}>
-            <Stack
-              pointerEvents={bottomSheetIndex === 0 ? 'box-only' : 'auto'}
-              style={{
+            <ScrollView
+              contentContainerStyle={{
                 flex: 1,
               }}>
               <ListItem
-                onPress={() => {
-                  globalStorage.set(
-                    'theme',
-                    theme === 'dark' ? 'light' : 'dark',
-                  );
-                  setTheme(theme === 'dark' ? 'light' : 'dark');
+                stateLayerProps={{skipPressOutAnimation: true}}
+                onPress={async e => {
+                  const cxRation = e.nativeEvent.pageX / SCREEN_WIDTH;
+                  const cyRatio = e.nativeEvent.pageY / SCREEN_HEIGHT;
+
+                  switchTheme({
+                    switchThemeFunction: () => {
+                      globalStorage.set(
+                        'theme',
+                        theme === 'dark' ? 'light' : 'dark',
+                      );
+                      setTheme(theme === 'dark' ? 'light' : 'dark');
+                    },
+                    animationConfig: {
+                      type: 'circular',
+                      duration: 900,
+                      startingPoint: {
+                        cxRatio: cxRation,
+                        cyRatio: cyRatio,
+                      },
+                    },
+                  });
                 }}
                 leftComponent={
                   <Icon
@@ -109,10 +140,10 @@ export default function SettingsPage() {
                   setDeleteDataDialogVisible(true);
                 }}
                 leftComponent={<Icon size={24} source="database" />}
-                text="Cache"
+                text={t('appData')}
               />
-            </Stack>
-          </TouchableWithoutFeedback>
+            </ScrollView>
+          </Pressable>
         </View>
 
         <DeleteDataModal
@@ -140,7 +171,7 @@ export default function SettingsPage() {
             <Text
               style={{paddingHorizontal: 12, paddingVertical: 8}}
               variant="titleLarge">
-              Select language
+              {t('selectLanguage')}
             </Text>
 
             <RadioButton.Group
@@ -185,17 +216,19 @@ type ListItemProps = {
   leftComponent: React.ReactNode;
   rightComponent?: React.ReactNode;
   text: string;
-  onPress?: () => void;
+  onPress?: (event: GestureResponderEvent) => void;
+  stateLayerProps?: StateLayerProps;
 };
 
 const ListItem = ({
   leftComponent: iconComponent,
   text,
   onPress,
+  stateLayerProps,
   rightComponent,
 }: ListItemProps) => {
   return (
-    <AnimatedPressable onPress={onPress}>
+    <AnimatedPressable onPress={onPress} stateLayerProps={stateLayerProps}>
       <View
         style={{
           flexDirection: 'row',
@@ -204,7 +237,11 @@ const ListItem = ({
           paddingVertical: 12,
           width: '100%',
         }}>
-        <View style={{width: 32, alignItems: 'center'}}>{iconComponent}</View>
+        <Animated.View
+          layout={LAYOUT_ANIMATION}
+          style={{width: 32, alignItems: 'center'}}>
+          {iconComponent}
+        </Animated.View>
         <Text variant="titleMedium"> {text}</Text>
         <View
           style={{

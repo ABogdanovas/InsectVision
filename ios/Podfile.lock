@@ -1067,6 +1067,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-theme-switch-animation (0.8.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-vector-icons (11.0.0):
     - DoubleConversion
     - glog
@@ -1530,6 +1551,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-skia (from `../node_modules/@shopify/react-native-skia`)"
+  - react-native-theme-switch-animation (from `../node_modules/react-native-theme-switch-animation`)
   - "react-native-vector-icons (from `../node_modules/@react-native-vector-icons/common`)"
   - react-native-worklets-core (from `../node_modules/react-native-worklets-core`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1664,6 +1686,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-skia:
     :path: "../node_modules/@shopify/react-native-skia"
+  react-native-theme-switch-animation:
+    :path: "../node_modules/react-native-theme-switch-animation"
   react-native-vector-icons:
     :path: "../node_modules/@react-native-vector-icons/common"
   react-native-worklets-core:
@@ -1785,6 +1809,7 @@ SPEC CHECKSUMS:
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162
   react-native-safe-area-context: 141eca0fd4e4191288dfc8b96a7c7e1c2983447a
   react-native-skia: 5baf1e5d1e93fdd90ad4ef6a9cad17b0fc1b72c3
+  react-native-theme-switch-animation: 4ea0e10e572b209249ad296affe31f44b2580b0f
   react-native-vector-icons: 21a4399b068f3ff1b9560136cd872467c5f98d39
   react-native-worklets-core: e0a05ed7887519277942efc866fd2785a24c86db
   React-nativeconfig: 3b359be06d9ee8d64c1eacbca4f1040f331573fd

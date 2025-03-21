@@ -6,6 +6,7 @@ import {globalStorage} from '../../../..';
 import FastImage from '@d11/react-native-fast-image';
 
 import RNRestart from 'react-native-restart';
+import {t} from 'i18next';
 
 type DeleteDataModalProps = {
   visible: boolean;
@@ -32,13 +33,10 @@ export const DeleteDataModal = ({
         onDismiss={() => {
           setVisible(false);
         }}>
-        <Dialog.Title>Clear cache</Dialog.Title>
+        <Dialog.Title>{t('clearCache')}</Dialog.Title>
         <Dialog.Content>
           <View style={{marginLeft: 4}}>
-            <Text variant="bodyMedium">
-              This option will permanently remove all your app data, including
-              settings, history and cache.
-            </Text>
+            <Text variant="bodyMedium">{t('clearCacheConfirmation')}</Text>
           </View>
         </Dialog.Content>
         <Dialog.Actions style={{justifyContent: 'space-between'}}>
@@ -46,10 +44,10 @@ export const DeleteDataModal = ({
             onPress={() => {
               setVisible(false);
             }}>
-            Close
+            {t('close')}
           </Button>
           <View style={{flexDirection: 'row'}}>
-            <Button onPress={deleteAllStorage}>Clear</Button>
+            <Button onPress={deleteAllStorage}>{t('clear')}</Button>
           </View>
         </Dialog.Actions>
       </Dialog>
