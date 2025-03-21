@@ -1,4 +1,4 @@
-import {PropsWithChildren, useState} from 'react';
+import {PropsWithChildren, useCallback, useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {MainContext, MessageType} from './MainContext';
 import {PaperProvider} from 'react-native-paper';
@@ -10,6 +10,7 @@ import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
 import {globalStorage} from '../..';
 
+import BootSplash from 'react-native-bootsplash';
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
 }
@@ -40,7 +41,15 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
 
   const [messages, setMessages] = useState<MessageType[]>([]);
 
+  const hideSplashScreen = useCallback(async () => {
+    await BootSplash.hide({fade: true});
+  }, []);
+
   i18n.changeLanguage(globalStorage.getString('language'));
+
+  useEffect(() => {
+    hideSplashScreen();
+  }, [hideSplashScreen]);
 
   return (
     <PersistQueryClientProvider

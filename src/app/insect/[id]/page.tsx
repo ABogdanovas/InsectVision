@@ -10,7 +10,7 @@ import {AssistantFAB, Stack} from '../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {useLinkTo, useParams} from '../../../../charon';
 import {useInsect} from '../../../services/useInsect';
-import {useEffect, useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Dimensions, Linking, Platform, ScrollView, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
@@ -25,13 +25,56 @@ import Animated, {
 import {t} from 'i18next';
 
 import ImageModal from 'react-native-image-modal';
+import {Insect} from '../../../beans/Insect';
 
 const HEADER_OFFSET = 20;
 
-const HEADER_MAX_HEIGHT = 300;
+const HEADER_MAX_HEIGHT = 240;
 
-const MIN_LATITUDE_DELTA = 30;
-const MIN_LONGITUDE_DELTA = 30;
+const initialLocation = (locations: Insect['locations']) => {
+  if (locations) {
+    let minLat = locations[0].latitude;
+    let maxLat = locations[0].latitude;
+    let minLng = locations[0].longitude;
+    let maxLng = locations[0].longitude;
+
+    if (locations.length === 1) {
+      return {
+        latitude: locations[0].latitude,
+        longitude: locations[0].longitude,
+        latitudeDelta: 100,
+        longitudeDelta: 100,
+      };
+    }
+
+    locations.forEach(loc => {
+      minLat = Math.min(minLat, loc.latitude);
+      maxLat = Math.max(maxLat, loc.latitude);
+      minLng = Math.min(minLng, loc.longitude);
+      maxLng = Math.max(maxLng, loc.longitude);
+    });
+
+    const latitude = (minLat + maxLat) / 2;
+    const longitude = (minLng + maxLng) / 2;
+    const latitudeDelta = (maxLat - minLat) * 1.3; // add padding or default value
+    const longitudeDelta = (maxLng - minLng) * 1.3; // add padding or default value
+
+    return {
+      latitude,
+      longitude,
+      latitudeDelta,
+      longitudeDelta,
+    };
+  }
+
+  // Default region if no locations
+  return {
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
+};
 
 export default function InsectPage() {
   const {goBack} = useNavigation();
@@ -47,40 +90,6 @@ export default function InsectPage() {
   const {bottom} = useSafeAreaInsets();
 
   const mapRef = useRef<MapView>(null);
-
-  useEffect(() => {
-    if (mapRef.current && data?.locations && data?.locations.length > 0) {
-      const latitudes = data?.locations.map(m => m.latitude);
-      const longitudes = data?.locations.map(m => m.longitude);
-      const minLat = Math.min(...latitudes);
-      const maxLat = Math.max(...latitudes);
-      const minLng = Math.min(...longitudes);
-      const maxLng = Math.max(...longitudes);
-
-      const midLat = (minLat + maxLat) / 2;
-      const midLng = (minLng + maxLng) / 2;
-
-      let latitudeDelta = maxLat - minLat;
-      let longitudeDelta = maxLng - minLng;
-
-      if (latitudeDelta < MIN_LATITUDE_DELTA) {
-        latitudeDelta = MIN_LATITUDE_DELTA;
-      }
-      if (longitudeDelta < MIN_LONGITUDE_DELTA) {
-        longitudeDelta = MIN_LONGITUDE_DELTA;
-      }
-
-      mapRef.current.animateToRegion(
-        {
-          latitude: midLat,
-          longitude: midLng,
-          latitudeDelta: latitudeDelta * 2,
-          longitudeDelta: longitudeDelta * 2,
-        },
-        500,
-      );
-    }
-  }, [data]);
 
   const [findingPestsControl, setFindingPestsControl] = useState(false);
 
@@ -242,6 +251,7 @@ export default function InsectPage() {
                 overflow: 'hidden',
               }}>
               <MapView
+                initialRegion={initialLocation(data.locations)}
                 ref={mapRef}
                 provider="google"
                 style={{width: '100%', height: 400}}>
