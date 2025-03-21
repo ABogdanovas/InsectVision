@@ -69,6 +69,7 @@ export const Chat = ({model, name}: ChatProps) => {
         <IconButton
           aria-label="send"
           loading={isLoading}
+          pointerEvents={isLoading ? 'none' : 'auto'}
           onPress={() => {
             setMessage('');
             sendNewMessage(message);
