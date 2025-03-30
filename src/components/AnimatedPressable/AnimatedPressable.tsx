@@ -6,6 +6,7 @@ import {StateLayerProps} from '../StateLayer/StateLayer';
 type AnimatedPressableProps = PropsWithChildren<
   {
     stateLayerProps?: StateLayerProps;
+    skipPressOutAnimation?: boolean;
   } & PressableProps
 >;
 
@@ -17,7 +18,6 @@ export const AnimatedPressable = ({
   ...props
 }: AnimatedPressableProps) => {
   const [pressed, setPressed] = useState(false);
-
   return (
     <Pressable
       onPressIn={(event: GestureResponderEvent) => {

@@ -6,14 +6,13 @@ import {
   Snackbar,
   Text,
 } from 'react-native-paper';
-import {AssistantFAB, Loading, Stack} from '../../../components';
+import {AssistantFAB, Stack} from '../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {useLinkTo, useParams} from '../../../../charon';
 import {useInsect} from '../../../services/useInsect';
-import {useEffect, useRef, useState} from 'react';
-import FastImage from '@d11/react-native-fast-image';
+import {useRef, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Linking, Platform, ScrollView, View} from 'react-native';
+import {Dimensions, Linking, Platform, ScrollView, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {PERMISSIONS, request} from 'react-native-permissions';
@@ -23,15 +22,59 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
+import {t} from 'i18next';
+
+import ImageModal from 'react-native-image-modal';
+import {Insect} from '../../../beans/Insect';
 
 const HEADER_OFFSET = 20;
 
-const HEADER_MAX_HEIGHT = 260;
+const HEADER_MAX_HEIGHT = 300;
 
-const MIN_LATITUDE_DELTA = 30;
-const MIN_LONGITUDE_DELTA = 30;
+const initialLocation = (locations: Insect['locations']) => {
+  if (locations) {
+    let minLat = locations[0].latitude;
+    let maxLat = locations[0].latitude;
+    let minLng = locations[0].longitude;
+    let maxLng = locations[0].longitude;
 
-const AnimatedImage = Animated.createAnimatedComponent(FastImage);
+    if (locations.length === 1) {
+      return {
+        latitude: locations[0].latitude,
+        longitude: locations[0].longitude,
+        latitudeDelta: 100,
+        longitudeDelta: 100,
+      };
+    }
+
+    locations.forEach(loc => {
+      minLat = Math.min(minLat, loc.latitude);
+      maxLat = Math.max(maxLat, loc.latitude);
+      minLng = Math.min(minLng, loc.longitude);
+      maxLng = Math.max(maxLng, loc.longitude);
+    });
+
+    const latitude = (minLat + maxLat) / 2;
+    const longitude = (minLng + maxLng) / 2;
+    const latitudeDelta = (maxLat - minLat) * 1.3; // add padding or default value
+    const longitudeDelta = (maxLng - minLng) * 1.3; // add padding or default value
+
+    return {
+      latitude,
+      longitude,
+      latitudeDelta,
+      longitudeDelta,
+    };
+  }
+
+  // Default region if no locations
+  return {
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
+};
 
 export default function InsectPage() {
   const {goBack} = useNavigation();
@@ -39,8 +82,6 @@ export default function InsectPage() {
   const {id} = useParams();
 
   const {data} = useInsect({id: Number(id)});
-
-  const [loading, setLoading] = useState(true);
 
   const {top} = useSafeAreaInsets();
 
@@ -50,39 +91,7 @@ export default function InsectPage() {
 
   const mapRef = useRef<MapView>(null);
 
-  useEffect(() => {
-    if (mapRef.current && data?.locations && data?.locations.length > 0) {
-      const latitudes = data?.locations.map(m => m.latitude);
-      const longitudes = data?.locations.map(m => m.longitude);
-      const minLat = Math.min(...latitudes);
-      const maxLat = Math.max(...latitudes);
-      const minLng = Math.min(...longitudes);
-      const maxLng = Math.max(...longitudes);
-
-      const midLat = (minLat + maxLat) / 2;
-      const midLng = (minLng + maxLng) / 2;
-
-      let latitudeDelta = maxLat - minLat;
-      let longitudeDelta = maxLng - minLng;
-
-      if (latitudeDelta < MIN_LATITUDE_DELTA) {
-        latitudeDelta = MIN_LATITUDE_DELTA;
-      }
-      if (longitudeDelta < MIN_LONGITUDE_DELTA) {
-        longitudeDelta = MIN_LONGITUDE_DELTA;
-      }
-
-      mapRef.current.animateToRegion(
-        {
-          latitude: midLat,
-          longitude: midLng,
-          latitudeDelta: latitudeDelta * 2,
-          longitudeDelta: longitudeDelta * 2,
-        },
-        500,
-      );
-    }
-  }, [data]);
+  const [findingPestsControl, setFindingPestsControl] = useState(false);
 
   const findPestsControl = async () => {
     const res = await request(
@@ -92,9 +101,9 @@ export default function InsectPage() {
         default: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
       }),
       {
-        title: 'Location permission needed',
-        message: 'We need your location to find the nearest insect control',
-        buttonPositive: 'OK',
+        title: t('locationPermissionTitle'),
+        message: t('locationPermissionDescription'),
+        buttonPositive: 'Ok',
       },
     );
 
@@ -104,25 +113,29 @@ export default function InsectPage() {
     }
 
     if (res === 'granted') {
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          const url = `https://www.google.com/maps/search/insect+control/@${latitude},${longitude},14z`;
-          Linking.canOpenURL(url)
-            .then(supported => {
-              if (supported) {
-                Linking.openURL(url);
-              } else {
-                console.error('Cannot open link', url);
-              }
-            })
-            .catch(err => console.error('Failed to open link', err));
-        },
-        error => {
-          console.error('Cannot set location', error);
-        },
-        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-      );
+      await new Promise(resolve => {
+        Geolocation.getCurrentPosition(
+          position => {
+            const {latitude, longitude} = position.coords;
+            const url = `https://www.google.com/maps/search/insect+control/@${latitude},${longitude},14z`;
+            Linking.canOpenURL(url)
+              .then(supported => {
+                if (supported) {
+                  Linking.openURL(url);
+                } else {
+                  console.error('Cannot open link', url);
+                }
+              })
+              .catch(err => console.error('Failed to open link', err))
+              .finally(() => resolve(null));
+          },
+          error => {
+            console.error('Cannot set location', error);
+            resolve(null);
+          },
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        );
+      });
     }
   };
 
@@ -154,22 +167,6 @@ export default function InsectPage() {
     };
   });
 
-  const animatedImageStyle = useAnimatedStyle(() => {
-    const imageScaler = (x: number, alpha: number = 0.1): number => {
-      return 1.1 - 0.1 / Math.pow(1 + x, alpha);
-    };
-
-    const scale = imageScaler(Math.abs(offsetY.value));
-
-    return {
-      transform: [
-        {
-          scaleY: offsetY.value < 0 ? scale : 1,
-        },
-      ],
-    };
-  });
-
   return (
     <Stack style={{height: '100%'}}>
       <Animated.ScrollView
@@ -190,31 +187,18 @@ export default function InsectPage() {
               marginBottom: -HEADER_OFFSET,
             },
           ]}>
-          <AnimatedImage
-            fallback
-            onLoadStart={() => setLoading(true)}
-            onLoadEnd={() => setLoading(false)}
+          <ImageModal
+            style={{
+              width: Dimensions.get('window').width,
+              height: HEADER_MAX_HEIGHT,
+            }}
+            imageBackgroundColor="#C0C0C0"
+            resizeMode="cover"
+            modalImageResizeMode="contain"
             source={{
               uri: data?.photo_urls[0],
-              cache: FastImage.cacheControl.cacheOnly,
             }}
-            style={[
-              {
-                height: HEADER_MAX_HEIGHT,
-                width: '100%',
-              },
-              animatedImageStyle,
-            ]}
           />
-          {loading && (
-            <Loading
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: HEADER_MAX_HEIGHT,
-              }}
-            />
-          )}
         </Animated.View>
         <Text variant="displaySmall" style={{paddingHorizontal: 16}}>
           {data?.name}
@@ -227,24 +211,30 @@ export default function InsectPage() {
               selectedColor="#fff"
               style={{backgroundColor: data?.is_danger && '#f94449'}}
               pointerEvents="none">
-              Danger
+              {t('isDanger')}
             </Chip>
           )}
-          {data?.is_flying && <Chip pointerEvents="none">Flying</Chip>}
-          {data?.is_biting && <Chip pointerEvents="none">Can bite</Chip>}
-          {data?.is_endangered && <Chip pointerEvents="none">Endangered</Chip>}
-          {data?.is_parasite && <Chip pointerEvents="none">Parasite</Chip>}
-          {data?.is_poisonous && <Chip pointerEvents="none">Poisonous</Chip>}
+          {data?.is_flying && <Chip pointerEvents="none">{t('isFlying')}</Chip>}
+          {data?.is_biting && <Chip pointerEvents="none">{t('isBiting')}</Chip>}
+          {data?.is_endangered && (
+            <Chip pointerEvents="none">{t('isEndangered')}</Chip>
+          )}
+          {data?.is_parasite && (
+            <Chip pointerEvents="none">{t('isParasite')}</Chip>
+          )}
+          {data?.is_poisonous && (
+            <Chip pointerEvents="none">{t('isPoisonous')}</Chip>
+          )}
         </ScrollView>
         <View style={{gap: 12, paddingHorizontal: 16}}>
-          <InsectCard title="Description">
+          <InsectCard title={t('description')}>
             <Text>{data?.description}</Text>
           </InsectCard>
-          <InsectCard title="Danger">
+          <InsectCard title={t('dangerDescription')}>
             <Text>{data?.danger_description}</Text>
           </InsectCard>
           <Card>
-            <Card.Title title="Locations" />
+            <Card.Title title={t('location')} />
             <Card.Content style={{marginBottom: 8}}>
               <Text>
                 {data?.locations &&
@@ -261,15 +251,10 @@ export default function InsectPage() {
                 overflow: 'hidden',
               }}>
               <MapView
+                initialRegion={initialLocation(data.locations)}
                 ref={mapRef}
                 provider="google"
-                style={{width: '100%', height: 400}}
-                initialRegion={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}>
+                style={{width: '100%', height: 400}}>
                 {data?.locations &&
                   data.locations.map(location => (
                     <Marker
@@ -283,11 +268,17 @@ export default function InsectPage() {
               </MapView>
             </View>
           </Card>
-          <InsectCard title="Habitat">
+          <InsectCard title={t('habitat')}>
             <Text>{data?.habitat}</Text>
           </InsectCard>
-          <Button onPress={findPestsControl} mode="contained">
-            Find insect control
+          <Button
+            loading={findingPestsControl}
+            onPress={async () => {
+              setFindingPestsControl(true);
+              findPestsControl().finally(() => setFindingPestsControl(false));
+            }}
+            mode="contained">
+            {t('findControl')}
           </Button>
         </View>
       </Animated.ScrollView>
@@ -311,8 +302,7 @@ export default function InsectPage() {
         }}
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}>
-        We need your location to find the nearest insect control, please enable
-        location permissions in the settings
+        {t('locationPermissionError')}
       </Snackbar>
       <AssistantFAB
         isVisible={!snackbarVisible}

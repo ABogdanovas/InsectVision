@@ -2,6 +2,7 @@ import {FAB, FABProps} from 'react-native-paper';
 import {AvailableIconNames} from '../Icon';
 import {useEffect, useState} from 'react';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import {Platform} from 'react-native';
 
 const robotIcons: AvailableIconNames[] = [
   'robot-outline',
@@ -42,7 +43,9 @@ export const AssistantFAB = ({
 
   return (
     <AnimatedFAB
-      sharedTransitionTag="assistantFAB"
+      sharedTransitionTag={
+        Platform.OS === 'android' ? 'assistant-fab' : undefined
+      }
       style={[animation, style]}
       icon={robotIcons[iconIndex]}
       animated={false}

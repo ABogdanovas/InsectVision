@@ -10,6 +10,7 @@ import {MainContext} from '../../app/MainContext';
 
 export type StateLayerProps = {
   color?: string;
+  skipPressOutAnimation?: boolean;
   pressedOpacity?: number;
   pressed?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -24,6 +25,7 @@ export const StateLayer = ({
   color,
   pressed = false,
   pressedOpacity = 0.1,
+  skipPressOutAnimation,
   style,
   layout,
 }: StateLayerProps) => {
@@ -34,7 +36,11 @@ export const StateLayer = ({
   }
 
   const animatedStyle = useAnimatedStyle(() => {
-    return {opacity: withTiming(pressed ? pressedOpacity : 0)};
+    return {
+      opacity: withTiming(pressed ? pressedOpacity : 0, {
+        duration: !pressed && skipPressOutAnimation ? 0 : 200,
+      }),
+    };
   });
 
   return (

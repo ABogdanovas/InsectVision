@@ -1,7 +1,7 @@
 import {Appbar, Searchbar, Text} from 'react-native-paper';
 import {AnimatedPressable, Loading, Stack} from '../../../components';
 import {t} from 'i18next';
-import {FlatList, Platform, View} from 'react-native';
+import {FlatList, View} from 'react-native';
 import {useCategories} from '../../../services/useCategories';
 import {Category} from '../../../beans/Category';
 import {Insect} from '../../../beans/Insect';
@@ -17,7 +17,6 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
-import {FlashList} from '@shopify/flash-list';
 
 const StickySearchbar = ({
   onFilterPress,
@@ -33,7 +32,7 @@ const StickySearchbar = ({
       icon="magnify"
       value={value}
       onChangeText={onChangeText}
-      placeholder="Search"
+      placeholder={t('search')}
       style={{marginTop: 8, marginHorizontal: 16}}
       traileringIcon="filter-variant"
       onTraileringIconPress={onFilterPress}
@@ -86,13 +85,11 @@ export default function HomePage() {
         <Appbar.Content title={t('insects')} />
       </Appbar.Header>
       <Animated.FlatList
-        itemLayoutAnimation={
-          Platform.OS === 'ios' ? layoutAnimation : undefined
-        }
+        itemLayoutAnimation={layoutAnimation}
         keyExtractor={(item, index) =>
           item.id.toString() + '_' + index.toString()
         }
-        contentContainerStyle={{gap: 8}}
+        contentContainerStyle={{gap: 8, paddingBottom: 16}}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
         ListHeaderComponent={StickySearchbar({
@@ -146,12 +143,12 @@ export default function HomePage() {
 }
 
 const InsectListItem = (item: Insect) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const linkTo = useLinkTo();
 
   return (
-    <Animated.View entering={FadeIn} exiting={FadeOut}>
+    <View>
       <View
         style={{width: 156, height: 156, borderRadius: 12, overflow: 'hidden'}}>
         <AnimatedPressable
@@ -181,12 +178,8 @@ const InsectListItem = (item: Insect) => {
         </AnimatedPressable>
       </View>
       <Text variant="bodyMedium">{item.name}</Text>
-    </Animated.View>
+    </View>
   );
-};
-
-const FlashListSeparator = () => {
-  return <View style={{width: 16}} />;
 };
 
 const InsectsList = ({
@@ -228,15 +221,14 @@ const InsectsList = ({
         {item.name}
       </Text>
 
-      <FlashList
+      <FlatList
         onEndReached={() => {
           fetchNextPage();
         }}
-        estimatedItemSize={156 + 16}
-        contentContainerStyle={{paddingHorizontal: 16}}
+        contentContainerStyle={{paddingHorizontal: 16, gap: 16}}
         showsHorizontalScrollIndicator={false}
         horizontal
-        ItemSeparatorComponent={FlashListSeparator}
+        maxToRenderPerBatch={10}
         data={
           isLoading
             ? Array.from({length: 5}).map(

@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {View} from 'react-native';
 import {FilterCategories} from '../../../beans/FilterCategories';
+import {t} from 'i18next';
 
 type ChipProps = {
   selected?: boolean;
@@ -119,7 +120,7 @@ export const FilterModal = ({items, setItems, ...other}: FilterModalProps) => {
 
             gap: 12,
           }}>
-          <Text variant="titleLarge">Select by categories</Text>
+          <Text variant="titleLarge">{t('searchByCategory')}</Text>
           <View
             style={{
               gap: 8,
@@ -143,7 +144,7 @@ export const FilterModal = ({items, setItems, ...other}: FilterModalProps) => {
                     });
                   });
                 }}
-                title={item.type}
+                title={t(item.type)}
               />
             ))}
           </View>
@@ -153,7 +154,7 @@ export const FilterModal = ({items, setItems, ...other}: FilterModalProps) => {
               justifyContent: 'space-between',
               paddingTop: 24,
             }}>
-            <Button onPress={other.onDismiss}>Close</Button>
+            <Button onPress={other.onDismiss}>{t('close')}</Button>
             <Button
               onPress={() => {
                 setItems(old => {
@@ -165,7 +166,7 @@ export const FilterModal = ({items, setItems, ...other}: FilterModalProps) => {
                   });
                 });
               }}>
-              Reset
+              {t('reset')}
             </Button>
           </View>
         </Stack>

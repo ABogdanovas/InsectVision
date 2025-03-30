@@ -3,6 +3,7 @@ import {FlatList, View} from 'react-native';
 import {IconButton, Text, TextInput, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useChat} from '../../services/sendMessage';
+import {t} from 'i18next';
 
 export type ChatProps = {
   name: string;
@@ -17,6 +18,11 @@ export const Chat = ({model, name}: ChatProps) => {
     name: name,
   });
 
+  const initialMessage = {
+    type: 'Assistant',
+    message: t('initialChatMessage'),
+  };
+
   const insets = useSafeAreaInsets();
 
   const [message, setMessage] = useState('');
@@ -24,7 +30,7 @@ export const Chat = ({model, name}: ChatProps) => {
   return (
     <View style={{flex: 1}}>
       <FlatList
-        data={messages}
+        data={[...messages, initialMessage]}
         keyExtractor={(_, index) => index.toString()}
         snapToEnd
         inverted
@@ -52,6 +58,7 @@ export const Chat = ({model, name}: ChatProps) => {
           alignItems: 'flex-end',
         }}>
         <TextInput
+          placeholder={t('chatPlaceholder')}
           accessibilityLabel="chat-input"
           onChangeText={setMessage}
           value={message}
@@ -62,6 +69,7 @@ export const Chat = ({model, name}: ChatProps) => {
         <IconButton
           aria-label="send"
           loading={isLoading}
+          pointerEvents={isLoading ? 'none' : 'auto'}
           onPress={() => {
             setMessage('');
             sendNewMessage(message);

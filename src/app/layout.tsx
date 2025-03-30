@@ -1,4 +1,4 @@
-import {PropsWithChildren, useState} from 'react';
+import {PropsWithChildren, useCallback, useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {MainContext, MessageType} from './MainContext';
 import {PaperProvider} from 'react-native-paper';
@@ -8,9 +8,9 @@ import {darkTheme, whiteTheme} from '../components';
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
 import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
-import {StatusBar} from 'react-native';
 import {globalStorage} from '../..';
 
+import BootSplash from 'react-native-bootsplash';
 function IconComponent(props: any) {
   return <MaterialCommunityIcons {...props} />;
 }
@@ -25,11 +25,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-const INITIAL_CHAT_MESSAGE: MessageType = {
-  type: 'Assistant',
-  message: 'Hello, how can I help you?',
-};
-
 export default function RootLayout({children}: PropsWithChildren<{}>) {
   const storedTheme = globalStorage.getString('theme') as
     | 'light'
@@ -40,17 +35,21 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
     globalStorage.set('theme', 'light');
   }
 
-  const [theme, setTheme] = useState<'light' | 'dark'>(storedTheme ?? 'light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    globalStorage.getString('theme') as 'light' | 'dark',
+  );
 
-  const [messages, setMessages] = useState<MessageType[]>([
-    INITIAL_CHAT_MESSAGE,
-  ]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
 
-  const [language, setLanguage] = useState<string>('en');
+  const hideSplashScreen = useCallback(async () => {
+    await BootSplash.hide({fade: true});
+  }, []);
 
   i18n.changeLanguage(globalStorage.getString('language'));
 
-  console.log('dawd');
+  useEffect(() => {
+    hideSplashScreen();
+  }, [hideSplashScreen]);
 
   return (
     <PersistQueryClientProvider
@@ -62,18 +61,13 @@ export default function RootLayout({children}: PropsWithChildren<{}>) {
           setTheme: setTheme,
           messages: messages,
           setMessages: setMessages,
-          language: language,
-          setLanguage: setLanguage,
         }}>
         <PaperProvider
-          theme={theme === 'light' ? whiteTheme : darkTheme}
+          theme={theme === 'dark' ? darkTheme : whiteTheme}
           settings={{
             icon: IconComponent,
           }}>
-          <SafeAreaProvider>
-            <StatusBar translucent />
-            {children}
-          </SafeAreaProvider>
+          <SafeAreaProvider>{children}</SafeAreaProvider>
         </PaperProvider>
       </MainContext.Provider>
     </PersistQueryClientProvider>

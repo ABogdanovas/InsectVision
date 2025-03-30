@@ -4,92 +4,193 @@ import {
   Camera,
   useCameraDevice,
   useCameraPermission,
-  useSkiaFrameProcessor,
+  useFrameProcessor,
 } from 'react-native-vision-camera';
 import {useTensorflowModel} from 'react-native-fast-tflite';
 
-import {Skia, PaintStyle} from '@shopify/react-native-skia';
-import {useEffect} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Button, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
+import {Worklets} from 'react-native-worklets-core';
+import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import {Dimensions} from 'react-native';
+import insectClasses from '../../ml/classes.json';
 
-import label from '../../ml/labelmap.json';
+const MODEL_SIZE = 480;
 
 export default function CameraPage() {
-  const objectDetection = useTensorflowModel(require('../../ml/model.tflite'));
+  const objectDetection = useTensorflowModel(
+    require('../../ml/model.tflite'),
+    Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
+  );
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
   const {resize} = useResizePlugin();
-  const frameProcessor = useSkiaFrameProcessor(
+
+  const [insect, setInsect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    classId: number;
+  } | null>(null);
+
+  const dismissInsectCounter = useRef(0);
+
+  const calculateInsect = Worklets.createRunOnJS(
+    (
+      newInsect: {
+        x: number;
+        y: number;
+        maxX: number;
+        maxY: number;
+        width: number;
+        height: number;
+        classId: number;
+        frameHeight: number;
+        frameWidth: number;
+      } | null,
+    ) => {
+      const dimension = Dimensions.get('screen');
+      const MODEL_SIZE = 480;
+
+      if (!newInsect) {
+        setInsect(null);
+        return;
+      }
+
+      const frameHeight = newInsect.frameWidth;
+      const frameWidth = newInsect.frameHeight;
+
+      const width = newInsect.maxX - newInsect.x;
+
+      const height = newInsect.maxY - newInsect.y;
+
+      const cropOffsetY = MODEL_SIZE * 1.77 - MODEL_SIZE;
+
+      const scale = Math.min(frameHeight / MODEL_SIZE, frameWidth / MODEL_SIZE);
+
+      const scaledX = newInsect.x * MODEL_SIZE * scale;
+      const scaledY = (newInsect.y * MODEL_SIZE + cropOffsetY / 2) * scale;
+      const scaledWidth = width * MODEL_SIZE * scale;
+      const scaledHeight = height * MODEL_SIZE * scale;
+
+      const cameraScaleX = dimension.width / frameWidth;
+      const cameraScaleY = dimension.height / frameHeight;
+
+      const cameraScale = Math.max(cameraScaleX, cameraScaleY);
+
+      const upslacesWidth = frameWidth * cameraScale;
+      const upslacesHeight = frameHeight * cameraScale;
+
+      const offsetX = (dimension.width - upslacesWidth) / 2;
+      const offsetY = (dimension.height - upslacesHeight) / 2;
+
+      setInsect({
+        x: scaledX * cameraScale + offsetX,
+        y: scaledY * cameraScale + offsetY,
+        width: scaledWidth * cameraScale,
+        height: scaledHeight * cameraScale,
+        classId: newInsect.classId,
+      });
+    },
+  );
+
+  const frameP = useFrameProcessor(
     frame => {
       'worklet';
+
       if (model == null) {
         return;
       }
-      const resized = resize(frame, {
-        scale: {
-          width: 320,
-          height: 320,
-        },
-        pixelFormat: 'rgb',
-        dataType: 'uint8',
-      });
-      frame.render();
 
-      const outputs = model.runSync([resized]);
+      try {
+        const resized = resize(frame, {
+          scale: {width: MODEL_SIZE, height: MODEL_SIZE},
+          pixelFormat: 'rgb',
+          dataType: 'float32',
+          rotation: '90deg',
+        });
 
-      const height = frame.height;
-      const width = frame.width;
+        const outputs = model.runSync([resized]);
+        const tensor = outputs[0];
 
-      const detection_boxes = outputs[0];
+        const frameWidth = frame.width;
+        const frameHeight = frame.height;
 
-      for (let i = 0; i < detection_boxes.length; i += 4) {
-        if (outputs[2][i / 4] < 0.5) {
-          continue;
+        const stride = 6;
+        // const numDetections = tensor.length / stride;
+
+        for (let i = 0; i < 1; i++) {
+          const offset = i * stride;
+
+          const x1 = Number(tensor[offset + 0]);
+          const y1 = Number(tensor[offset + 1]);
+          const x2 = Number(tensor[offset + 2]);
+          const y2 = Number(tensor[offset + 3]);
+
+          const score = tensor[offset + 4];
+          const classId = tensor[offset + 5];
+
+          if (score > 0.5) {
+            calculateInsect({
+              height: y2 - y1,
+              width: x2 - x1,
+              x: x1,
+              y: y1,
+              maxX: x2,
+              maxY: y2,
+              classId: Number(classId),
+              frameHeight: frameHeight,
+              frameWidth: frameWidth,
+            });
+          } else {
+            if (dismissInsectCounter.current > 5) {
+              dismissInsectCounter.current = 0;
+              calculateInsect(null);
+            } else {
+              dismissInsectCounter.current++;
+            }
+          }
         }
-
-        const minX = Number(detection_boxes[i]) * width;
-
-        const maxX = Number(detection_boxes[i + 2]) * width;
-
-        const minY = Number(detection_boxes[i + 1]) * height;
-        const maxY = Number(detection_boxes[i + 3]) * height;
-
-        const w = maxX - minX;
-        const h = maxY - minY;
-
-        // const x = Number(detection_boxes[i + 1]) * width;
-        // const y = Number(detection_boxes[i]) * height;
-
-        // const w =
-        //   (Number(detection_boxes[i + 3]) - Number(detection_boxes[i + 1])) *
-        //   width;
-        // const h =
-        //   (Number(detection_boxes[i + 2]) - Number(detection_boxes[i])) *
-        //   height;
-
-        const rect = Skia.RRectXY(
-          {
-            x: minX,
-            y: minY,
-            height: h,
-            width: w,
-          },
-          24,
-          24,
-        );
-        const paint = Skia.Paint();
-        paint.setStyle(PaintStyle.Stroke);
-        paint.setColor(Skia.Color('yellow'));
-        paint.setStrokeWidth(2);
-        paint.setAntiAlias(true);
-
-        frame.drawRRect(rect, paint);
+      } catch (err) {
+        console.error('❌ Error in frameProcessor:', err);
       }
     },
     [model],
   );
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      borderWidth: 2,
+      borderColor: 'yellow',
+      position: 'absolute',
+
+      top: withTiming(insect?.y ?? 0, {duration: 100}),
+      left: withTiming(insect?.x ?? 0, {duration: 100}),
+      width: withTiming(insect?.width ?? 0, {duration: 100}),
+      height: withTiming(insect?.height ?? 0, {duration: 100}),
+      borderTopRightRadius: 12,
+      borderBottomLeftRadius: 12,
+      borderBottomRightRadius: 12,
+    };
+  });
+
+  const animatedTextContainer = useAnimatedStyle(() => {
+    return {
+      backgroundColor: 'yellow',
+      position: 'absolute',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      overflow: 'hidden',
+      borderTopLeftRadius: 6,
+      borderTopRightRadius: 6,
+
+      top: withTiming(insect?.y ? insect?.y - 24 : 0, {duration: 100}),
+      left: withTiming(insect?.x ? insect.x : 0, {duration: 100}),
+    };
+  });
 
   const {hasPermission, requestPermission} = useCameraPermission();
   const device = useCameraDevice('back');
@@ -126,12 +227,25 @@ export default function CameraPage() {
   return (
     <Stack style={{flex: 1}}>
       <Camera
+        enableZoomGesture
         pixelFormat="rgb"
         device={device}
-        frameProcessor={frameProcessor}
+        frameProcessor={frameP}
         isActive
+        focusable
         style={StyleSheet.absoluteFill}
+        resizeMode="cover"
       />
+      <Animated.View pointerEvents="none" style={animatedTextContainer}>
+        <Text
+          style={{
+            color: 'black',
+            fontSize: 18,
+          }}>
+          {insect?.classId && insectClasses[insect.classId]}
+        </Text>
+      </Animated.View>
+      <Animated.View style={animatedStyle} />
     </Stack>
   );
 }

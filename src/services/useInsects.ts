@@ -1,7 +1,6 @@
 import {useInfiniteQuery} from '@tanstack/react-query';
-import {useSafeContext} from '@sirse-dev/safe-context';
-import {MainContext} from '../app/MainContext';
 import {fetchInsects} from './fetchInsects';
+import {globalStorage} from '../..';
 
 export const useInsects = ({
   category_id,
@@ -19,7 +18,7 @@ export const useInsects = ({
     isPoisonous: boolean;
   };
 }) => {
-  const {language} = useSafeContext(MainContext);
+  const language = globalStorage.getString('language');
 
   const pageSize = 10;
 
