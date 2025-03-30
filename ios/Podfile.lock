@@ -1044,7 +1044,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (4.14.1):
     - React-Core
-  - react-native-skia (1.11.18):
+  - react-native-skia (1.12.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1808,7 +1808,7 @@ SPEC CHECKSUMS:
   react-native-mmkv: 8c9a677e64a1ac89b0c6cf240feea528318b3074
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162
   react-native-safe-area-context: 141eca0fd4e4191288dfc8b96a7c7e1c2983447a
-  react-native-skia: 5baf1e5d1e93fdd90ad4ef6a9cad17b0fc1b72c3
+  react-native-skia: ec8044f67ac23bd8a9ac4aa4cddc92d224ab5cdc
   react-native-theme-switch-animation: 4ea0e10e572b209249ad296affe31f44b2580b0f
   react-native-vector-icons: 21a4399b068f3ff1b9560136cd872467c5f98d39
   react-native-worklets-core: e0a05ed7887519277942efc866fd2785a24c86db

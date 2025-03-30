@@ -11,15 +11,11 @@ import {useTensorflowModel} from 'react-native-fast-tflite';
 import {useEffect, useRef, useState} from 'react';
 import {Button, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
-import {
-  LayoutChangeEvent,
-  LayoutRectangle,
-  Platform,
-  StyleSheet,
-} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 import {Worklets} from 'react-native-worklets-core';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {Dimensions} from 'react-native';
+import insectClasses from '../../ml/classes.json';
 
 const MODEL_SIZE = 480;
 
@@ -40,11 +36,7 @@ export default function CameraPage() {
     classId: number;
   } | null>(null);
 
-  const cameraLayout = useRef<LayoutRectangle>();
-
-  const handleCameraLayout = ({nativeEvent}: LayoutChangeEvent) => {
-    cameraLayout.current = nativeEvent.layout;
-  };
+  const dismissInsectCounter = useRef(0);
 
   const calculateInsect = Worklets.createRunOnJS(
     (
@@ -60,8 +52,7 @@ export default function CameraPage() {
         frameWidth: number;
       } | null,
     ) => {
-      const {width: screenWidth, height: screenHeight} =
-        Dimensions.get('screen');
+      const dimension = Dimensions.get('screen');
       const MODEL_SIZE = 480;
 
       if (!newInsect) {
@@ -69,73 +60,38 @@ export default function CameraPage() {
         return;
       }
 
-      if (!cameraLayout.current) {
-        return;
-      }
+      const frameHeight = newInsect.frameWidth;
+      const frameWidth = newInsect.frameHeight;
 
-      const frameHeight = newInsect.frameHeight;
-      const frameWidth = newInsect.frameWidth;
+      const width = newInsect.maxX - newInsect.x;
 
-      // what model sees
-      const modelMinX = newInsect.x * MODEL_SIZE;
-      const modelMinY = newInsect.y * MODEL_SIZE;
-      const modelMaxX = newInsect.maxX * MODEL_SIZE;
-      const modelMaxY = newInsect.maxY * MODEL_SIZE;
+      const height = newInsect.maxY - newInsect.y;
 
-      const rotatedModelX = MODEL_SIZE - modelMaxY;
-      const rotatedModelY = modelMinX;
+      const cropOffsetY = MODEL_SIZE * 1.77 - MODEL_SIZE;
 
-      const rotatedWidth = modelMaxY - modelMinY;
-      const rotatedHeight = modelMaxX - modelMinX;
+      const scale = Math.min(frameHeight / MODEL_SIZE, frameWidth / MODEL_SIZE);
 
-      const scaleX = frameHeight / MODEL_SIZE;
-      const scaleY = frameWidth / MODEL_SIZE;
+      const scaledX = newInsect.x * MODEL_SIZE * scale;
+      const scaledY = (newInsect.y * MODEL_SIZE + cropOffsetY / 2) * scale;
+      const scaledWidth = width * MODEL_SIZE * scale;
+      const scaledHeight = height * MODEL_SIZE * scale;
 
-      const scale = Math.min(scaleX, scaleY);
+      const cameraScaleX = dimension.width / frameWidth;
+      const cameraScaleY = dimension.height / frameHeight;
 
-      // console.log('scaleX', scaleX);
-      // console.log('scaleY', scaleY);
+      const cameraScale = Math.max(cameraScaleX, cameraScaleY);
 
-      const unnormilizedX = rotatedModelX * scaleX;
-      const unnormilizedY = rotatedModelY * scaleY;
-      const unnormilizedWidth = rotatedWidth * scale;
-      const unnormilizedHeight = rotatedHeight * scale;
+      const upslacesWidth = frameWidth * cameraScale;
+      const upslacesHeight = frameHeight * cameraScale;
 
-      // console.log('unnormilizedX', unnormilizedX);
-      // console.log('unnormilizedY', unnormilizedY);
-      // console.log('unnormilizedWidth', unnormilizedWidth);
-      // console.log('unnormilizedHeight', unnormilizedHeight);
-
-      const finalScaleX = screenWidth / frameWidth;
-      const finalScaleY = screenHeight / frameHeight;
-
-      const finalScale = Math.max(
-        finalScaleX,
-        finalScaleY,
-        Platform.select({ios: -1000, android: 1, default: NaN}),
-      );
-
-      const upscaledWidth = frameWidth * finalScale;
-      const upscaledHeight = frameHeight * finalScale;
-
-      const offsetX = (screenWidth - upscaledWidth) / 2;
-      const offsetY = (screenHeight - upscaledHeight) / 2;
-
-      console.log(
-        JSON.stringify({
-          x: unnormilizedX * finalScale + offsetY,
-          y: unnormilizedY * finalScale + offsetX,
-          width: unnormilizedWidth * finalScale,
-          height: frameHeight * finalScale,
-          classId: newInsect.classId,
-        }),
-      );
+      const offsetX = (dimension.width - upslacesWidth) / 2;
+      const offsetY = (dimension.height - upslacesHeight) / 2;
 
       setInsect({
-        x: unnormilizedX * finalScale + offsetY,
-        y: unnormilizedY * finalScale + offsetX,
-        width: unnormilizedWidth * finalScale,
-        height: frameHeight * finalScale,
+        x: scaledX * cameraScale + offsetX,
+        y: scaledY * cameraScale + offsetY,
+        width: scaledWidth * cameraScale,
+        height: scaledHeight * cameraScale,
         classId: newInsect.classId,
       });
     },
@@ -154,6 +110,7 @@ export default function CameraPage() {
           scale: {width: MODEL_SIZE, height: MODEL_SIZE},
           pixelFormat: 'rgb',
           dataType: 'float32',
+          rotation: '90deg',
         });
 
         const outputs = model.runSync([resized]);
@@ -163,7 +120,7 @@ export default function CameraPage() {
         const frameHeight = frame.height;
 
         const stride = 6;
-        const numDetections = tensor.length / stride;
+        // const numDetections = tensor.length / stride;
 
         for (let i = 0; i < 1; i++) {
           const offset = i * stride;
@@ -189,13 +146,16 @@ export default function CameraPage() {
               frameWidth: frameWidth,
             });
           } else {
-            calculateInsect(null);
+            if (dismissInsectCounter.current > 5) {
+              dismissInsectCounter.current = 0;
+              calculateInsect(null);
+            } else {
+              dismissInsectCounter.current++;
+            }
           }
-
-          console.log(classId);
         }
       } catch (err) {
-        console.error('❌ Ошибка в frameProcessor:', err);
+        console.error('❌ Error in frameProcessor:', err);
       }
     },
     [model],
@@ -211,7 +171,24 @@ export default function CameraPage() {
       left: withTiming(insect?.x ?? 0, {duration: 100}),
       width: withTiming(insect?.width ?? 0, {duration: 100}),
       height: withTiming(insect?.height ?? 0, {duration: 100}),
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderTopRightRadius: 12,
+      borderBottomLeftRadius: 12,
+      borderBottomRightRadius: 12,
+    };
+  });
+
+  const animatedTextContainer = useAnimatedStyle(() => {
+    return {
+      backgroundColor: 'yellow',
+      position: 'absolute',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      overflow: 'hidden',
+      borderTopLeftRadius: 6,
+      borderTopRightRadius: 6,
+
+      top: withTiming(insect?.y ? insect?.y - 24 : 0, {duration: 100}),
+      left: withTiming(insect?.x ? insect.x : 0, {duration: 100}),
     };
   });
 
@@ -250,15 +227,24 @@ export default function CameraPage() {
   return (
     <Stack style={{flex: 1}}>
       <Camera
+        enableZoomGesture
         pixelFormat="rgb"
         device={device}
-        fps={24}
-        onLayout={handleCameraLayout}
         frameProcessor={frameP}
         isActive
+        focusable
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
       />
+      <Animated.View pointerEvents="none" style={animatedTextContainer}>
+        <Text
+          style={{
+            color: 'black',
+            fontSize: 18,
+          }}>
+          {insect?.classId && insectClasses[insect.classId]}
+        </Text>
+      </Animated.View>
       <Animated.View style={animatedStyle} />
     </Stack>
   );
