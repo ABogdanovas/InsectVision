@@ -9,20 +9,26 @@ import {
 import {useTensorflowModel} from 'react-native-fast-tflite';
 
 import {useEffect, useRef, useState} from 'react';
-import {Button, Text} from 'react-native-paper';
+import {Button, IconButton, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
-import {Platform, StyleSheet} from 'react-native';
+import {Pressable, PressableProps, StyleSheet} from 'react-native';
 import {Worklets} from 'react-native-worklets-core';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {Dimensions} from 'react-native';
 import insectClasses from '../../ml/classes.json';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
 
 const MODEL_SIZE = 480;
 
 export default function CameraPage() {
+  const {top, bottom} = useSafeAreaInsets();
+
+  const {goBack} = useNavigation();
+
   const objectDetection = useTensorflowModel(
     require('../../ml/model.tflite'),
-    Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
+    // Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
   );
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
@@ -34,7 +40,13 @@ export default function CameraPage() {
     width: number;
     height: number;
     classId: number;
-  } | null>(null);
+  } | null>({
+    height: 120,
+    width: 120,
+    x: 250,
+    y: 250,
+    classId: 7,
+  });
 
   const dismissInsectCounter = useRef(0);
 
@@ -53,7 +65,6 @@ export default function CameraPage() {
       } | null,
     ) => {
       const dimension = Dimensions.get('screen');
-      const MODEL_SIZE = 480;
 
       if (!newInsect) {
         setInsect(null);
@@ -67,7 +78,9 @@ export default function CameraPage() {
 
       const height = newInsect.maxY - newInsect.y;
 
-      const cropOffsetY = MODEL_SIZE * 1.77 - MODEL_SIZE;
+      const cropOffsetY =
+        (MODEL_SIZE * newInsect.frameWidth) / newInsect.frameHeight -
+        MODEL_SIZE;
 
       const scale = Math.min(frameHeight / MODEL_SIZE, frameWidth / MODEL_SIZE);
 
@@ -81,11 +94,11 @@ export default function CameraPage() {
 
       const cameraScale = Math.max(cameraScaleX, cameraScaleY);
 
-      const upslacesWidth = frameWidth * cameraScale;
-      const upslacesHeight = frameHeight * cameraScale;
+      const upscaledWidth = frameWidth * cameraScale;
+      const upscaledHeight = frameHeight * cameraScale;
 
-      const offsetX = (dimension.width - upslacesWidth) / 2;
-      const offsetY = (dimension.height - upslacesHeight) / 2;
+      const offsetX = (dimension.width - upscaledWidth) / 2;
+      const offsetY = (dimension.height - upscaledHeight) / 2;
 
       setInsect({
         x: scaledX * cameraScale + offsetX,
@@ -134,6 +147,7 @@ export default function CameraPage() {
           const classId = tensor[offset + 5];
 
           if (score > 0.5) {
+            console.log(classId);
             calculateInsect({
               height: y2 - y1,
               width: x2 - x1,
@@ -214,12 +228,8 @@ export default function CameraPage() {
     return (
       <Stack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Text>No camera dete</Text>
-        <Button
-          style={{backgroundColor: '#daa'}}
-          onPress={() => {
-            linkTo('/home');
-          }}>
-          dawda
+        <Button style={{backgroundColor: '#daa'}} onPress={goBack}>
+          back
         </Button>
       </Stack>
     );
@@ -236,16 +246,89 @@ export default function CameraPage() {
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
       />
+      <IconButton
+        icon="arrow-left"
+        mode="contained"
+        onPress={goBack}
+        style={{position: 'absolute', top: top + 8, left: 8}}
+      />
       <Animated.View pointerEvents="none" style={animatedTextContainer}>
         <Text
           style={{
             color: 'black',
             fontSize: 18,
           }}>
-          {insect?.classId && insectClasses[insect.classId]}
+          {insect && insectClasses[insect.classId]}
         </Text>
       </Animated.View>
       <Animated.View style={animatedStyle} />
+      <MakePhotoButton
+        disabled={!insect}
+        onPress={() => {
+          linkTo('/insect/1');
+        }}
+        style={{
+          position: 'absolute',
+          bottom: bottom + 32,
+          left: Dimensions.get('window').width / 2 - 64 / 2,
+          zIndex: 10,
+          height: 64,
+          width: 64,
+        }}
+      />
     </Stack>
   );
 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type MakePhotoButtonProps = {
+  disabled?: boolean;
+} & PressableProps;
+
+const MakePhotoButton = ({
+  disabled,
+  onPressIn,
+  onPressOut,
+  style,
+  ...others
+}: MakePhotoButtonProps) => {
+  const [pressed, setPressed] = useState(false);
+
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(disabled ? 0.5 : 1, {duration: 300}),
+      borderRadius: 100000,
+      borderColor: 'white',
+      borderWidth: 3,
+      flex: 1,
+    };
+  });
+
+  const animatedInnierViewStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: 'white',
+      margin: 3,
+      flex: 1,
+      borderRadius: 100000,
+      transform: [{scale: withTiming(pressed ? 0.9 : 1, {duration: 100})}],
+    };
+  });
+
+  return (
+    <AnimatedPressable
+      disabled={disabled}
+      style={[animatedContainerStyle, style]}
+      onPressIn={e => {
+        setPressed(true);
+        onPressIn?.(e);
+      }}
+      onPressOut={e => {
+        setPressed(false);
+        onPressOut?.(e);
+      }}
+      {...others}>
+      <Animated.View pointerEvents="box-none" style={animatedInnierViewStyle} />
+    </AnimatedPressable>
+  );
+};
