@@ -201,7 +201,7 @@ export default function InsectPage() {
           />
         </Animated.View>
         <Text variant="displaySmall" style={{paddingHorizontal: 16}}>
-          {data?.name}
+          {data?.name.charAt(0).toUpperCase() + data?.name.slice(1)}
         </Text>
         <ScrollView
           horizontal
