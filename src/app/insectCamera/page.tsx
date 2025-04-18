@@ -32,7 +32,7 @@ export default function CameraPage() {
 
   const objectDetection = useTensorflowModel(
     require('../../ml/model.tflite'),
-    Platform.OS === 'android' ? 'default' : 'core-ml',
+    Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
   );
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
