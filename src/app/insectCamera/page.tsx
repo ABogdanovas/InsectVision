@@ -11,9 +11,13 @@ import {useTensorflowModel} from 'react-native-fast-tflite';
 import {useEffect, useRef, useState} from 'react';
 import {Button, IconButton, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
-import {Pressable, PressableProps, StyleSheet} from 'react-native';
+import {Platform, Pressable, PressableProps, StyleSheet} from 'react-native';
 import {Worklets} from 'react-native-worklets-core';
-import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 import {Dimensions} from 'react-native';
 import insectClasses from '../../ml/classes.json';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -28,7 +32,7 @@ export default function CameraPage() {
 
   const objectDetection = useTensorflowModel(
     require('../../ml/model.tflite'),
-    // Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
+    Platform.OS === 'android' ? 'default' : 'core-ml',
   );
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
@@ -40,13 +44,7 @@ export default function CameraPage() {
     width: number;
     height: number;
     classId: number;
-  } | null>({
-    height: 120,
-    width: 120,
-    x: 250,
-    y: 250,
-    classId: 7,
-  });
+  } | null>(null);
 
   const dismissInsectCounter = useRef(0);
 
@@ -178,7 +176,11 @@ export default function CameraPage() {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       borderWidth: 2,
-      borderColor: 'yellow',
+      borderColor: interpolateColor(
+        insect && insectClasses[insect.classId].isDanger ? 1 : 0,
+        [1, 0],
+        ['red', 'yellow'],
+      ),
       position: 'absolute',
 
       top: withTiming(insect?.y ?? 0, {duration: 100}),
@@ -193,13 +195,18 @@ export default function CameraPage() {
 
   const animatedTextContainer = useAnimatedStyle(() => {
     return {
-      backgroundColor: 'yellow',
+      backgroundColor: interpolateColor(
+        insect && insectClasses[insect.classId].isDanger ? 1 : 0,
+        [1, 0],
+        ['red', 'yellow'],
+      ),
       position: 'absolute',
       paddingHorizontal: 6,
       paddingVertical: 2,
       overflow: 'hidden',
       borderTopLeftRadius: 6,
       borderTopRightRadius: 6,
+      opacity: withTiming(insect ? 1 : 0, {duration: 100}),
 
       top: withTiming(insect?.y ? insect?.y - 24 : 0, {duration: 100}),
       left: withTiming(insect?.x ? insect.x : 0, {duration: 100}),
@@ -258,14 +265,14 @@ export default function CameraPage() {
             color: 'black',
             fontSize: 18,
           }}>
-          {insect && insectClasses[insect.classId]}
+          {insect && insectClasses[insect.classId].name}
         </Text>
       </Animated.View>
       <Animated.View style={animatedStyle} />
       <MakePhotoButton
         disabled={!insect}
         onPress={() => {
-          linkTo('/insect/1');
+          linkTo(`/insect/${insect?.classId! + 38 + 1}`);
         }}
         style={{
           position: 'absolute',

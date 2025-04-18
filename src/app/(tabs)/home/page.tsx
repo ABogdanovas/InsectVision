@@ -177,7 +177,9 @@ const InsectListItem = (item: Insect) => {
           )}
         </AnimatedPressable>
       </View>
-      <Text variant="bodyMedium">{item.name}</Text>
+      <Text variant="bodyMedium" style={{maxWidth: 156}} numberOfLines={1}>
+        {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+      </Text>
     </View>
   );
 };
@@ -218,7 +220,7 @@ const InsectsList = ({
   return (
     <View style={{gap: 4}}>
       <Text variant="titleLarge" style={{paddingHorizontal: 16}}>
-        {item.name}
+        {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
       </Text>
 
       <FlatList
