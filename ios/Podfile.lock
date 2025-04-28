@@ -1850,7 +1850,7 @@ SPEC CHECKSUMS:
   TensorFlowLiteC: eac6d689a8d391d1b202dc59e3d9165ba64aaf73
   vision-camera-resize-plugin: 8847ccd1940a61e84e23a3148bc1f1a20cecfd5f
   VisionCamera: 3cc9afb487bb11de5dca69581e976ca473bb39ea
-  Yoga: 9db4b2da1ed5d8e0c94158f9ac379c8b1b529f59
+  Yoga: 272dddd3c0e1e23d09ba81ed55ddfa7fdd3caa17
 
 PODFILE CHECKSUM: 30d2eda2d32e36c6f99a526780202992dbdde1eb
 

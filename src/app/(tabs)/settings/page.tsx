@@ -31,7 +31,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {AnimatedPressable} from '../../../components';
-import {globalStorage} from '../../../..';
+import {globalStorage} from '../../../../index';
 import {DeleteDataModal} from './DeleteDataModal';
 import {useSafeContext} from '@sirse-dev/safe-context';
 import {MainContext} from '../../MainContext';

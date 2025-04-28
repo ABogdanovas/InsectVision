@@ -29,6 +29,7 @@
     "@tanstack/react-query-persist-client": "^5.66.9",
     "@types/path-browserify": "^1.0.3",
     "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
     "i18next": "^23.16.5",
     "install": "^0.13.0",
     "npm": "^11.1.0",

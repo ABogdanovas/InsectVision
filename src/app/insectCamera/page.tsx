@@ -7,8 +7,8 @@ import {
   useFrameProcessor,
 } from 'react-native-vision-camera';
 import {useTensorflowModel} from 'react-native-fast-tflite';
-
-import {useEffect, useRef, useState} from 'react';
+import RNFetchBlob from 'react-native-blob-util';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {Button, IconButton, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
 import {Platform, Pressable, PressableProps, StyleSheet} from 'react-native';
@@ -22,6 +22,8 @@ import {Dimensions} from 'react-native';
 import insectClasses from '../../ml/classes.json';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
+import {globalStorage} from '../../../index';
+import {ScanHistory} from '../../beans/ScanHistory';
 
 const MODEL_SIZE = 480;
 
@@ -32,7 +34,7 @@ export default function CameraPage() {
 
   const objectDetection = useTensorflowModel(
     require('../../ml/model.tflite'),
-    Platform.OS === 'android' ? 'android-gpu' : 'core-ml',
+    Platform.OS === 'android' ? 'default' : 'core-ml',
   );
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
@@ -145,7 +147,6 @@ export default function CameraPage() {
           const classId = tensor[offset + 5];
 
           if (score > 0.5) {
-            console.log(classId);
             calculateInsect({
               height: y2 - y1,
               width: x2 - x1,
@@ -224,6 +225,46 @@ export default function CameraPage() {
 
   const linkTo = useLinkTo();
 
+  const camera = useRef<Camera>(null);
+
+  const scanInsect = useCallback(async () => {
+    if (!insect) {
+      return;
+    }
+
+    try {
+      const photo = await camera.current?.takePhoto();
+
+      const fileName = photo?.path.split('/').pop();
+
+      await RNFetchBlob.fs.cp(
+        `${photo?.path.replace('file://', '')}`,
+        RNFetchBlob.fs.dirs.DocumentDir + '/' + fileName,
+      );
+
+      const oldHistory = JSON.parse(
+        globalStorage.getString('scanHistory') ?? '[]',
+      ) as ScanHistory[];
+
+      const currentDate = new Date();
+
+      const newHistory: ScanHistory[] = [
+        {
+          insectId: insect?.classId ?? 0,
+          imagePath: `file://${RNFetchBlob.fs.dirs.DocumentDir}/${fileName}`,
+          date: currentDate.toISOString(),
+          name: insectClasses[insect.classId].name,
+        },
+        ...oldHistory,
+      ];
+      globalStorage.set('scanHistory', JSON.stringify(newHistory));
+
+      linkTo(`/insect/${insect?.classId! + 38 + 1}`);
+    } catch (e) {
+      console.log('Error in scan history:', e);
+    }
+  }, [insect, linkTo]);
+
   if (!hasPermission) {
     return (
       <Stack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -244,6 +285,8 @@ export default function CameraPage() {
   return (
     <Stack style={{flex: 1}}>
       <Camera
+        ref={camera}
+        photo
         enableZoomGesture
         pixelFormat="rgb"
         device={device}
@@ -271,9 +314,7 @@ export default function CameraPage() {
       <Animated.View style={animatedStyle} />
       <MakePhotoButton
         disabled={!insect}
-        onPress={() => {
-          linkTo(`/insect/${insect?.classId! + 38 + 1}`);
-        }}
+        onPress={scanInsect}
         style={{
           position: 'absolute',
           bottom: bottom + 32,

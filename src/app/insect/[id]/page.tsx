@@ -54,10 +54,20 @@ const initialLocation = (locations: Insect['locations']) => {
       maxLng = Math.max(maxLng, loc.longitude);
     });
 
+    // if (Math.abs(minLng - maxLng) > 120) {
+    //   return {
+    //     latitude: locations[0].latitude,
+    //     longitude: locations[0].longitude,
+    //     latitudeDelta: 1000,
+    //     longitudeDelta: 1000,
+    //   };
+    // }
+    console.log(minLng - maxLng);
+
     const latitude = (minLat + maxLat) / 2;
     const longitude = (minLng + maxLng) / 2;
-    const latitudeDelta = (maxLat - minLat) * 1.3; // add padding or default value
-    const longitudeDelta = (maxLng - minLng) * 1.3; // add padding or default value
+    const latitudeDelta = 1000; // add padding or default value
+    const longitudeDelta = 1000; // add padding or default value
 
     return {
       latitude,
