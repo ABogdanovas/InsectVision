@@ -9,9 +9,15 @@ import {
 import {useTensorflowModel} from 'react-native-fast-tflite';
 import RNFetchBlob from 'react-native-blob-util';
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Button, IconButton, Text} from 'react-native-paper';
+import {ActivityIndicator, Button, IconButton, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
-import {Platform, Pressable, PressableProps, StyleSheet} from 'react-native';
+import {
+  Platform,
+  Pressable,
+  PressableProps,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {Worklets} from 'react-native-worklets-core';
 import Animated, {
   interpolateColor,
@@ -19,11 +25,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {Dimensions} from 'react-native';
-import insectClasses from '../../ml/classes.json';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {globalStorage} from '../../../index';
 import {ScanHistory} from '../../beans/ScanHistory';
+import {getML} from '../../services/getML';
 
 const MODEL_SIZE = 480;
 
@@ -32,10 +38,34 @@ export default function CameraPage() {
 
   const {goBack} = useNavigation();
 
+  const [insectClasses, setInsectClasses] = useState<
+    {
+      name: string;
+      isDanger: boolean;
+    }[]
+  >([]);
+
+  const [isClassesLoading, setIsClassesLoading] = useState(true);
+
+  const getMLCallback = useCallback(async () => {
+    const paths_ml = await getML(true);
+
+    const indexes = await RNFetchBlob.fs.readFile(paths_ml!.indexes, 'utf8');
+
+    setInsectClasses(JSON.parse(indexes));
+    setIsClassesLoading(false);
+  }, []);
+
+  useEffect(() => {
+    getMLCallback();
+  }, [getMLCallback]);
+
+  //FIXME library cannot open tflite files directly from phone storage
   const objectDetection = useTensorflowModel(
     require('../../ml/model.tflite'),
     Platform.OS === 'android' ? 'default' : 'core-ml',
   );
+
   const model =
     objectDetection.state === 'loaded' ? objectDetection.model : undefined;
   const {resize} = useResizePlugin();
@@ -114,7 +144,7 @@ export default function CameraPage() {
     frame => {
       'worklet';
 
-      if (model == null) {
+      if (!model) {
         return;
       }
 
@@ -201,6 +231,7 @@ export default function CameraPage() {
         [1, 0],
         ['red', 'yellow'],
       ),
+
       position: 'absolute',
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -263,7 +294,7 @@ export default function CameraPage() {
     } catch (e) {
       console.log('Error in scan history:', e);
     }
-  }, [insect, linkTo]);
+  }, [insect, insectClasses, linkTo]);
 
   if (!hasPermission) {
     return (
@@ -272,16 +303,67 @@ export default function CameraPage() {
       </Stack>
     );
   }
-  if (device == null) {
+  if (
+    device === null ||
+    (insectClasses.length === 0 && !isClassesLoading) ||
+    objectDetection.state === 'error'
+  ) {
     return (
       <Stack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text>No camera dete</Text>
-        <Button style={{backgroundColor: '#daa'}} onPress={goBack}>
-          back
+        <Text variant="displayLarge">Error</Text>
+        <Button
+          labelStyle={{color: 'white'}}
+          style={{backgroundColor: 'red'}}
+          onPress={goBack}>
+          Go back
         </Button>
       </Stack>
     );
   }
+
+  if (objectDetection.state === 'loading' || isClassesLoading) {
+    return (
+      <Stack style={{flex: 1}}>
+        <Camera
+          device={device}
+          isActive
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+        <IconButton
+          icon="arrow-left"
+          mode="contained"
+          onPress={goBack}
+          style={{position: 'absolute', top: top + 8, left: 8, zIndex: 10}}
+        />
+        <MakePhotoButton
+          disabled
+          style={{
+            position: 'absolute',
+            bottom: bottom + 32,
+            left: Dimensions.get('window').width / 2 - 64 / 2,
+            zIndex: 5,
+            height: 64,
+            width: 64,
+          }}
+        />
+        <View
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            backgroundColor: 'black',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0.9,
+            zIndex: 5,
+          }}>
+          <ActivityIndicator size="large" />
+        </View>
+      </Stack>
+    );
+  }
+
   return (
     <Stack style={{flex: 1}}>
       <Camera
@@ -305,10 +387,15 @@ export default function CameraPage() {
       <Animated.View pointerEvents="none" style={animatedTextContainer}>
         <Text
           style={{
-            color: 'black',
+            color:
+              insect && insectClasses[insect.classId].isDanger
+                ? 'white'
+                : 'black',
             fontSize: 18,
           }}>
-          {insect && insectClasses[insect.classId].name}
+          {insect &&
+            insectClasses[insect.classId].name[0].toUpperCase() +
+              insectClasses[insect.classId].name.slice(1)}
         </Text>
       </Animated.View>
       <Animated.View style={animatedStyle} />
