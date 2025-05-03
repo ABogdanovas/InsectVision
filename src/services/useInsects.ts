@@ -1,6 +1,6 @@
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {fetchInsects} from './fetchInsects';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 export const useInsects = ({
   category_id,

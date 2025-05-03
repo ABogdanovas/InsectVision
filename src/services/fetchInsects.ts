@@ -1,6 +1,6 @@
 import {supabase} from './supabase';
 import {Insect, insectSchema} from '../beans/Insect';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 export const fetchInsects = async ({
   filterCategories,

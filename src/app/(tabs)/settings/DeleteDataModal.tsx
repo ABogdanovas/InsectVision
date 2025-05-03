@@ -2,7 +2,7 @@ import {View} from 'react-native';
 import {Button, Dialog, Portal, Text} from 'react-native-paper';
 import {queryCacheStorage} from '../../../utils/clientStorage';
 import {queryClient} from '../../layout';
-import {globalStorage} from '../../../..';
+import {globalStorage} from '../../../../globalStorage';
 import FastImage from '@d11/react-native-fast-image';
 
 import RNRestart from 'react-native-restart';

@@ -1,5 +1,5 @@
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import {globalStorage} from '../../index';
+import {globalStorage} from '../../globalStorage';
 import {supabase} from './supabase';
 
 export const getML = async (isDefault: boolean = true) => {

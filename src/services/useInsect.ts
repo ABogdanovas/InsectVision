@@ -1,6 +1,6 @@
 import {useSuspenseQuery} from '@tanstack/react-query';
 import {fetchInsect} from './fetchInsect';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 export const useInsect = ({id}: {id: number}) => {
   const language = globalStorage.getString('language');

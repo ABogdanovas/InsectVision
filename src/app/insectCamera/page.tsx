@@ -27,7 +27,7 @@ import Animated, {
 import {Dimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
-import {globalStorage} from '../../../index';
+import {globalStorage} from '../../../globalStorage';
 import {ScanHistory} from '../../beans/ScanHistory';
 import {getML} from '../../services/getML';
 

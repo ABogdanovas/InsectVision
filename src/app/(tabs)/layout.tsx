@@ -3,7 +3,7 @@ import {View} from 'react-native';
 import {useActiveRoute, useLinkTo} from '../../../charon';
 import {AssistantFAB, BottomBar, Tab} from '../../components';
 import {t} from 'i18next';
-import {globalStorage} from '../../..';
+import {globalStorage} from '../../../globalStorage';
 
 export default function TabsLayout({children}: PropsWithChildren<{}>) {
   const linkTo = useLinkTo();

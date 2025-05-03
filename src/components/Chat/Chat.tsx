@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {FlatList, View} from 'react-native';
 import {IconButton, Text, TextInput, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useChat} from '../../services/sendMessage';
+import {useChat} from '../../services/useChat';
 import {t} from 'i18next';
 
 export type ChatProps = {

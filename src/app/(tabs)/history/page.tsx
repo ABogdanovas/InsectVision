@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import {Canvas, useSVG, ImageSVG} from '@shopify/react-native-skia';
 
 import {Dimensions, FlatList, ListRenderItemInfo, View} from 'react-native';
-import {globalStorage} from '../../../../index';
+import {globalStorage} from '../../../../globalStorage';
 import {ScanHistory} from '../../../beans/ScanHistory';
 import {useEffect, useRef, useState} from 'react';
 import ImageModal, {ReactNativeImageModal} from 'react-native-image-modal';

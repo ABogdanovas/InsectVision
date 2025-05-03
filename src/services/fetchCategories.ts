@@ -1,6 +1,6 @@
 import {supabase} from './supabase';
 import {Category, categorySchema} from '../beans/Category';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 export const fetchCategories = async ({
   language,

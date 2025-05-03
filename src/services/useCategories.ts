@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
 import {fetchCategories} from './fetchCategories';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 export const useCategories = () => {
   const language = globalStorage.getString('language');

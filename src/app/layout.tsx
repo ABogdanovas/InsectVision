@@ -8,7 +8,7 @@ import {darkTheme, whiteTheme} from '../components';
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
 import {QueryClient} from '@tanstack/react-query';
 import {clientPersister} from '../utils/clientStorage';
-import {globalStorage} from '../..';
+import {globalStorage} from '../../globalStorage';
 
 import BootSplash from 'react-native-bootsplash';
 function IconComponent(props: any) {

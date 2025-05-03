@@ -11,8 +11,6 @@ const context = require.context(
   /^(?:\.\/)(?!(?:(?:(?:.*\+api)|(?:\+html)))\.[tj]sx?$).*\.[tj]sx?$/,
 );
 
-export const globalStorage = new MMKV({id: 'globalStorage'});
-
 export default function App() {
   return (
     <Router
