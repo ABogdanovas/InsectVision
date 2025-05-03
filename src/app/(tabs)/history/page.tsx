@@ -106,7 +106,9 @@ const RenderItem = ({item}: ListRenderItemInfo<ScanHistory>) => {
           />
         </View>
         <View style={{gap: 4}}>
-          <Text variant="titleLarge">{item.name}</Text>
+          <Text variant="titleLarge">
+            {item.name[0].toLocaleUpperCase() + item.name.slice(1)}
+          </Text>
           <Text>{dayjs(item.date).format('YYYY-MM-DD HH:mm')}</Text>
         </View>
       </View>
