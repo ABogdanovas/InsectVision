@@ -1,0 +1,9 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp
+- tapOn: 'Settings'
+- tapOn: ' App data'
+- tapOn: 'Clear cache'
+- tapOn: 'Are you sure you want to clear the cache? This will remove all data and reset the app to its initial state.'
+- tapOn: 'Clear'

@@ -1,0 +1,21 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp:
+    permissions:
+      all: unset
+- tapOn: 'Stag Beetle'
+- swipe:
+    start: 50%, 50%
+    end: 50%, 10%
+    duration: 200
+- tapOn: 'Find insect control'
+- assertVisible:
+    id: 'com.android.permissioncontroller:id/permission_message'
+- tapOn:
+    id: 'com.android.permissioncontroller:id/permission_allow_foreground_only_button'
+- assertVisible:
+    id: 'com.google.android.apps.maps:id/fab_icon'
+- assertVisible:
+    text: 'insect control'
+    index: 1

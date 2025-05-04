@@ -1,0 +1,20 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp:
+    permissions:
+      all: unset
+- tapOn: 'Scanner'
+- assertVisible: 'Allow InsectVision to take pictures and record video?'
+## - Need to add check for location permission after it will be implemented
+- tapOn:
+    id: 'com.android.permissioncontroller:id/permission_allow_foreground_only_button'
+- assertVisible: 'Cicadellidae'
+- tapOn:
+    id: 'make-photo-button'
+- assertVisible: 'Cicadellidae'
+- stopApp
+- launchApp
+- tapOn: 'History'
+- assertVisible: 'Scan history'
+- assertVisible: 'Cicadellidae'

@@ -1,0 +1,11 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp
+- tapOn: 'Settings'
+- assertVisible: ' English'
+- tapOn: ' English'
+- assertVisible: 'Select language'
+- tapOn: ' Lithuanian'
+- assertVisible: ' Tamsus režimas'
+- assertVisible: 'Skenavimas'

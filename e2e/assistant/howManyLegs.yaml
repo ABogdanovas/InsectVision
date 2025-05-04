@@ -1,0 +1,11 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp
+- tapOn:
+    id: 'assistant-fab-content'
+- assertVisible: 'Your assistant'
+- assertVisible: 'Hello! How can I help you?'
+- tapOn: 'Type a message...'
+- inputText: 'How many legs do insects have? Return just the number.'
+- assertVisible: '6'

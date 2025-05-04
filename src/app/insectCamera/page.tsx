@@ -12,6 +12,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Button, IconButton, Text} from 'react-native-paper';
 import {useLinkTo} from '../../../charon';
 import {
+  Linking,
   Platform,
   Pressable,
   PressableProps,
@@ -30,6 +31,7 @@ import {useNavigation} from '@react-navigation/native';
 import {globalStorage} from '../../../globalStorage';
 import {ScanHistory} from '../../beans/ScanHistory';
 import {getML} from '../../services/getML';
+import {t} from 'i18next';
 
 const MODEL_SIZE = 480;
 
@@ -48,6 +50,8 @@ export default function CameraPage() {
   const [isClassesLoading, setIsClassesLoading] = useState(true);
 
   const getMLCallback = useCallback(async () => {
+    //TODO add download model according to location
+
     const paths_ml = await getML(true);
 
     const indexes = await RNFetchBlob.fs.readFile(paths_ml!.indexes, 'utf8');
@@ -298,8 +302,24 @@ export default function CameraPage() {
 
   if (!hasPermission) {
     return (
-      <Stack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Allow permission</Text>
+      <Stack
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 24,
+        }}>
+        <Text>{t('allowPermission')}</Text>
+        <View style={{flexDirection: 'row', gap: 8}}>
+          <Button onPress={goBack}>{t('back')}</Button>
+          <Button
+            mode="contained"
+            onPress={() => {
+              Linking.openSettings();
+            }}>
+            {t('allowPermission')}
+          </Button>
+        </View>
       </Stack>
     );
   }
@@ -452,6 +472,7 @@ const MakePhotoButton = ({
 
   return (
     <AnimatedPressable
+      testID={'make-photo-button'}
       disabled={disabled}
       style={[animatedContainerStyle, style]}
       onPressIn={e => {

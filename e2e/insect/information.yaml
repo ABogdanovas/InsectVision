@@ -1,0 +1,22 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp
+- tapOn: 'Stag Beetle'
+- tapOn:
+    id: 'insect-image'
+- tapOn: '×'
+- assertVisible: 'Flying'
+- assertVisible: 'Description'
+- assertVisible: 'The stag beetle is a striking insect notable for its large, antler-like mandibles used by males during mating competitions. This beetle plays a vital role in forest ecosystems by breaking down decaying wood and recycling nutrients back into the soil. Its life cycle is long and complex, with larvae developing in rotting logs over several years before emerging as robust adults. The stag beetle not only fascinates entomologists but also serves as an excellent example of nature’s efficiency in decomposition. Its presence in the forest underscores the importance of every organism in maintaining ecological balance and contributing to natural recycling processes.'
+- tapOn: 'Danger description'
+- tapOn: 'Stag beetles are not dangerous to humans despite their impressive appearance. Their large mandibles are used mainly for mating battles, and they do not cause harm. In nature, their role in breaking down decaying wood is beneficial, although their size may startle some observers.'
+- swipe:
+    start: 50%, 50%
+    end: 50%, 10%
+    duration: 200
+- assertVisible: 'Habitat'
+- assertVisible: 'Location'
+- assertVisible: 'Europe'
+- assertVisible: '54.526,15.2551'
+- assertVisible: 'Stag beetles inhabit deciduous and mixed forests where fallen logs, leaf litter, and abundant decaying wood provide the essential conditions for their extended larval development and eventual emergence as adult beetles.'

@@ -1,0 +1,8 @@
+appId: com.insectvision
+---
+- clearState: com.insectvision
+- launchApp
+- tapOn: 'Settings'
+- assertVisible: ' Light mode'
+- tapOn: ' Light mode'
+- assertVisible: ' Dark mode'

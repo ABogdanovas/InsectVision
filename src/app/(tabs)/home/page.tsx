@@ -177,7 +177,13 @@ const InsectListItem = (item: Insect) => {
           )}
         </AnimatedPressable>
       </View>
-      <Text variant="bodyMedium" style={{maxWidth: 156}} numberOfLines={1}>
+      <Text
+        onPress={() => {
+          linkTo(`/insect/${item.id}`);
+        }}
+        variant="bodyMedium"
+        style={{maxWidth: 156}}
+        numberOfLines={1}>
         {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
       </Text>
     </View>

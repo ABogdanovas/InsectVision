@@ -1,0 +1,12 @@
+appId: com.insectvision
+---
+- clearState
+- launchApp
+- assertVisible: 'Insects'
+- tapOn:
+    id: 'search-bar-clear-icon'
+- tapOn: 'Endangered'
+- tapOn: 'Flying'
+- tapOn: 'Close'
+- assertVisible: 'Butterflies and Moths (Lepidoptera)'
+- assertVisible: 'Monarch Butterfly'

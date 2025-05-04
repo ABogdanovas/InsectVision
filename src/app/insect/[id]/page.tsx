@@ -62,7 +62,6 @@ const initialLocation = (locations: Insect['locations']) => {
     //     longitudeDelta: 1000,
     //   };
     // }
-    console.log(minLng - maxLng);
 
     const latitude = (minLat + maxLat) / 2;
     const longitude = (minLng + maxLng) / 2;
@@ -188,6 +187,7 @@ export default function InsectPage() {
           paddingBottom: bottom + 16 + 48, // To prevent the FAB from overlapping the content
         }}>
         <Animated.View
+          testID="insect-image"
           style={[
             animatedImageContainerStyle,
             {
@@ -268,6 +268,11 @@ export default function InsectPage() {
                 {data?.locations &&
                   data.locations.map(location => (
                     <Marker
+                      title={
+                        location.latitude.toString() +
+                        ',' +
+                        location.longitude.toString()
+                      }
                       key={location.id}
                       coordinate={{
                         latitude: location.latitude,

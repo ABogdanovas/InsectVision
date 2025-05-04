@@ -43,6 +43,7 @@ export const AssistantFAB = ({
 
   return (
     <AnimatedFAB
+      testID="assistant-fab"
       sharedTransitionTag={
         Platform.OS === 'android' ? 'assistant-fab' : undefined
       }

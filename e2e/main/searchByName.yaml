@@ -1,0 +1,10 @@
+appId: com.insectvision
+---
+- clearState
+- launchApp
+- assertVisible: 'Insects'
+- assertVisible: 'Search insects'
+- tapOn: 'Search insects'
+- inputText: 'Mole cricket'
+- assertVisible: 'Grasshoppers, Crickets, and Locusts (Orthoptera)'
+- assertVisible: 'Mole cricket'
