@@ -1,9 +1,10 @@
 import {PropsWithChildren, useEffect, useState} from 'react';
 import {View} from 'react-native';
-import {useActiveRoute, useLinkTo} from '../../../charon';
+import {useActiveRoute} from '../../../fileBasedNavigator';
 import {AssistantFAB, BottomBar, Tab} from '../../components';
 import {t} from 'i18next';
 import {globalStorage} from '../../../globalStorage';
+import {useLinkTo} from '@react-navigation/native';
 
 export default function TabsLayout({children}: PropsWithChildren<{}>) {
   const linkTo = useLinkTo();

@@ -8,7 +8,7 @@ import {Insect} from '../../../beans/Insect';
 import {useInsects} from '../../../services/useInsects';
 import FastImage from '@d11/react-native-fast-image';
 import {useState} from 'react';
-import {useLinkTo} from '../../../../charon';
+
 import {FilterModal} from './FilterModal';
 import {FilterCategories} from '../../../beans/FilterCategories';
 import {useDebounce} from 'use-debounce';
@@ -17,6 +17,7 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
+import {useLinkTo} from '@react-navigation/native';
 
 const StickySearchbar = ({
   onFilterPress,

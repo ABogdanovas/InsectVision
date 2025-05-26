@@ -1,8 +1,7 @@
 import React from 'react';
 import {AppRegistry} from 'react-native';
 import {name as appName} from './app.json';
-import {Router} from './charon';
-import {MMKV} from 'react-native-mmkv';
+import {Router} from './fileBasedNavigator';
 
 const context = require.context(
   './src/app',

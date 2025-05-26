@@ -7,8 +7,8 @@ import {
   Text,
 } from 'react-native-paper';
 import {AssistantFAB, Stack} from '../../../components';
-import {useNavigation} from '@react-navigation/native';
-import {useLinkTo, useParams} from '../../../../charon';
+import {useLinkTo, useNavigation} from '@react-navigation/native';
+import {useParams} from '../../../../fileBasedNavigator';
 import {useInsect} from '../../../services/useInsect';
 import {useRef, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';

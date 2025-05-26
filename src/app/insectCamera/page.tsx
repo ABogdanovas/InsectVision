@@ -10,7 +10,6 @@ import {useTensorflowModel} from 'react-native-fast-tflite';
 import RNFetchBlob from 'react-native-blob-util';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Button, IconButton, Text} from 'react-native-paper';
-import {useLinkTo} from '../../../charon';
 import {
   Linking,
   Platform,
@@ -27,7 +26,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {Dimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useLinkTo, useNavigation} from '@react-navigation/native';
 import {globalStorage} from '../../../globalStorage';
 import {ScanHistory} from '../../beans/ScanHistory';
 import {getML} from '../../services/getML';
