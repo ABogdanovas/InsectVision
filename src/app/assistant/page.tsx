@@ -22,7 +22,7 @@ export default function AssistantPage() {
         <Appbar.Content title={t('yourAssistant')} />
       </Appbar.Header>
       <Stack style={{flex: 1}}>
-        <Chat model="gpt-3.5-turbo" name={''} />
+        <Chat model="gpt-3.5-turbo" name="" />
       </Stack>
     </KeyboardAvoidingView>
   );
